@@ -32,12 +32,13 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Root demo PNG (regenerable); allow papers/figures
+# Root demo PNG (regenerable); allow papers/figures and report PDF
 *.png
 *.pdf
 !papers/figures/
 !papers/figures/**/*.png
 !papers/figures/**/*.pdf
+!reports/*.pdf
 
 # Large binary arrays under data/synthetic (JSON metadata is tracked)
 data/synthetic/*.npy
