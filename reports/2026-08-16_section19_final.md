@@ -18,8 +18,8 @@
 | **HTTPS URL** | **https://github.com/Coucou2016/DOX-LBM-GPU** |
 | 可见性 | **PUBLIC** |
 | 默认分支 | `master` |
-| **最新 commit SHA** | `7f3c…`（以 `git log -1` / 下方精确值为准；推送后见下一行） |
-| 精确 HEAD（推送前写入时） | 见本节末“Git 状态”更新 |
+| **最新 commit SHA** | `3c29feae306601f441e2367ebb30b248a722b6dc` |
+| 精确 HEAD | 本文件入仓后若再改 SHA，以 `git log -1` / GitHub 默认分支最新提交为准；推送本更新时目标为包含本行的 commit |
 
 **已推送内容（策展）：**
 
