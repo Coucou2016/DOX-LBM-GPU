@@ -5,24 +5,27 @@
 
 ## Exemplar architectures to imitate (literature survey)
 
-> **Advisor note:** Cursor 内置浏览器无法维持 ChatGPT 标签，对话 URL **未建立**。下表由本地 WebSearch（2026-08-16）独立检索并经判断采纳；用户仍可将 `docs/chatgpt/2026-08-16_paper_framework_task.md` 粘贴到已登录 ChatGPT（web search ON）复核。
+> **Advisor note (2026-08-16):** Cursor 无浏览器 MCP，无法维持 ChatGPT 会话 URL。下表综合既有大纲 + Round-1 WebSearch 顾问备忘（`docs/chatgpt/round_1_notes.md`），经独立判断采纳。
 
 | # | Exemplar | Why imitate |
 |---|----------|-------------|
 | 1 | Villar-Valero et al., *J Physiol* 2025 (doi:10.1113/jp288819) + STACOM 2024 | Primary scientific target: parametric λ×D fibrosis scan, S1–S2, VA endpoint; modified MS + LBM–GPU twin |
 | 2 | Chabiniok & Zaha commentary (*J Physiol*, doi:10.1113/jp290313) | Translational framing: open the method, personalizable MS, clinical distance |
 | 3 | Campos et al., *Front Physiol* 2024 (doi:10.3389/fphys.2024.1370795) | Fibrosis-representation choice → VA morphology; openCARP monodomain inducibility ladder |
-| 4 | Biasi et al. CardioMat, *Comput Biol Med* 2024 (doi:10.1016/j.compbiomed.2024.109529) | Methods/toolbox paper architecture: pipeline → verification → application bounds |
-| 5 | Arevalo / Zahid-style fibrosis–reentry + openCARP verification culture | Results ladder: validation → inducibility map → mechanism (wavelength) → limits |
+| 4 | *Sci. Rep.* 2024 fibrosis reentry (doi:10.1038/s41598-024-62002-5) | Induction vs observation windows; explicit endpoint definitions |
+| 5 | CinC 2025 ventricular twin (e.g. CinC2025-149): S1–S2; reentry = multi-cycle closed-loop | Peer language for cycle-required VA |
+| 6 | Biasi et al. CardioMat, *Comput Biol Med* 2024 | Methods/toolbox: pipeline → verification → application bounds |
+
+**Rejected as structural template:** clinical AF ablation twin depth papers (e.g. Nat Cardiovasc Res 2024) — too far from methods-scaffold claims.
 
 ## Recommended section map (methods + mechanism)
 
 1. **Title / Abstract (EN)** — bounded methods claim  
 2. **Introduction** — DOX fibrosis → VA; gap = closed LBM source + wavelength mismatch on small discs  
-3. **Related work** — twins, LBM vs FD, phenomenological MS  
-4. **Methods** — λ-MS; `div(D∇u)`; tissue classes; S1–S2; *require_cycle* VA; annulus geometry; verification suite  
-5. **Results** — 0D APD; 2D CV; diffusion operator; annulus phase diagram; disc negative control  
-6. **Discussion** — honest novelty; Chabiniok–Zaha “open the method”; what 2D cannot do  
+3. **Related work** — twins, LBM vs FD, phenomenological MS (cite λ lineage carefully)  
+4. **Methods** — λ-MS; `div(D∇u)`; tissue classes; **simulation protocol & endpoints** (induction vs observation); *require_cycle* VA; annulus geometry; verification suite  
+5. **Results** — 0D APD; 2D CV; diffusion operator; **full 4×3** annulus phase diagram; disc negative control  
+6. **Discussion** — honest novelty; Chabiniok–Zaha “open the method”; MI≠DOX; what 2D cannot do  
 7. **Methods appendix / Code availability** — pytest gates, SciencePlots figures  
 
 ## Defensible innovation claims (and forbidden claims)
@@ -44,8 +47,15 @@
 |-----|-----------|-----------|
 | 1 | `fig_ms_0d_ap` | 0D AP + APD₉₀ |
 | 2 | `fig_validation_summary` | APD / CV / phase counts |
-| 3 | `fig_phase_diagram` | λ×D inducibility (annulus) |
+| 3 | `fig_phase_diagram` | λ×D inducibility (annulus, prefer full grid) |
 | 4 | `fig_diffusion_compare` | div vs Laplace persist |
 | 5 | `fig_mono2d_u` | 2D monodomain snapshot |
 
 Regenerate: `python scripts/plot_science.py`
+
+## Live numbers (2026-08-16 regenerate)
+
+- pytest: 42 passed  
+- APD₉₀: 256.6 ms  
+- CV: 0.703125 mm/ms @ D=0.0465  
+- Full phase diagram: **VA 3 / Non-VA 9** (`papers/data/phase_diagram.csv`, mode=full)

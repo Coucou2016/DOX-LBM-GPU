@@ -47,14 +47,14 @@ FIGURE_SPECS = (
     {
         "stem": "fig_validation_summary",
         "num": "图2",
-        "title": "验证汇总：0D APD、均匀 2D CV、快速相图计数",
-        "caption": "灰带为预设可接受带宽；CV 目标线 0.70 mm/ms；相图为钉扎环 2×2 快扫。",
+        "title": "验证汇总：0D APD、均匀 2D CV、相图计数",
+        "caption": "灰带为预设可接受带宽；CV 目标线 0.70 mm/ms；相图计数同步自 phase_diagram_summary.json。",
     },
     {
         "stem": "fig_phase_diagram",
         "num": "图3",
-        "title": "钉扎环 λ_fib × D_fib 诱发性相图（1 VA / 3 Non-VA）",
-        "caption": "暖色=VA，冷色=Non-VA；唯一 VA 格点为 λ=0.01 且 D↓90%。",
+        "title": "钉扎环 λ_fib × D_fib 诱发性相图",
+        "caption": "暖色=VA，冷色=Non-VA；计数以 phase_diagram_summary.json 为准。",
     },
     {
         "stem": "fig_diffusion_compare",
@@ -235,8 +235,9 @@ def figure_explanations_html() -> dict[str, str]:
 <li><strong>左栏（0D APD）：</strong>灰带为预设可接受带宽；点应落在带内（≈256.6 ms）。</li>
 <li><strong>中栏（均匀 2D CV）：</strong>灰带 0.55–0.85 mm/ms；虚线目标 <strong>0.70 mm/ms</strong>
 （数值上等于论文健康纤维向 ≈0.7 m/s）。CV 由标定扩散系数 D 得到。</li>
-<li><strong>右栏（快速相图计数）：</strong>钉扎环 2×2 快扫，期望 <strong>1 VA / 3 Non-VA</strong>。
-若变成 0/4，优先怀疑几何放不下波长；若变成 4/4，优先怀疑终点过松。</li>
+<li><strong>右栏（相图计数）：</strong>钉扎环 λ×D 扫描计数；完整 4×3 为 <strong>VA 3 / Non-VA 9</strong>
+（快扫 2×2 子集曾为 1/3，与重叠格点一致）。若变成全 Non-VA，优先怀疑几何放不下波长；
+若变成全 VA，优先怀疑终点过松。</li>
 </ul>
 <p><strong>常见误读：</strong>把“灰带内”理解成临床精度。这里是方法学量级锚定，不是猪心实测拟合。</p>
 <p><strong>结论：</strong>离子时程、健康纤维向量级 CV、以及可同时出现正负标签的相图三者同屏成立。</p>
@@ -253,14 +254,14 @@ def figure_explanations_html() -> dict[str, str]:
 <ul>
 <li>横轴：纤维化区扩散降幅 D<sub>fib</sub> reduction（传导变慢）。</li>
 <li>纵轴：兴奋性参数 λ<sub>fib</sub>（Djabella：抬高内向电流阈值；健康 0.01，0.3 近功能阻滞）。</li>
-<li>暖色=VA，冷色=Non-VA；默认快扫仅 4 格。</li>
-<li>唯一 VA：<strong>λ=0.01 × D↓90%</strong>。此时 CV≈√0.1×0.70≈0.22 mm/ms，波长≈55 mm &lt; 107 mm，几何允许折返，
-且周期必需准则看到再兴奋（extra / probes）。</li>
-<li>λ=0.3 两格：接近阻滞 → Non-VA；D↓30%×λ=0.01：波长仍偏长 → Non-VA。</li>
+<li>暖色=VA，冷色=Non-VA；本报告嵌入 <strong>完整 4×3（12 格）</strong>：VA 3 / Non-VA 9。</li>
+<li>VA 格点：λ=0.01×D↓70%、λ=0.01×D↓90%、λ=0.1×D↓30%。其中两格 persist&lt;1000 ms，
+说明 cycle-required 终点不依赖 persist 阈值。</li>
+<li>λ≥0.2 全 Non-VA；λ=0.1 在强减速下亦 Non-VA——勿外推为猪 LV 定量规律。</li>
 </ul>
 <p><strong>与表1对照：</strong>读图时必须同时看 <code>n_extra_cycles</code> / <code>n_probes_relapped</code>。
 仅 persist≥1000 ms 不够——平台滞留会被判 Non-VA。</p>
-<p><strong>结论：</strong>在要求再兴奋周期的 VA 准则下，相图是机制可解释的 1/3 混合，而不是“全阴/全阳”假象。</p>
+<p><strong>结论：</strong>在要求再兴奋周期的 VA 准则下，完整相图是机制可解释的混合结果（3/9），而不是“全阴/全阳”假象。</p>
 """,
         "fig_diffusion_compare": """
 <p><strong>故事从哪里来：</strong>单域方程的扩散项在数学上应是守恒形式 ∇·(D∇u)。
@@ -310,7 +311,7 @@ Villar-Valero 等（STACOM 2024 / <em>J Physiol</em> 2025，doi:10.1113/jp288819
 <p>当该 LBM–GPU 源码不可用时，本仓库提供开放的 <strong>CPU 二维有限差分单域脚手架</strong>：对齐修正 MS、守恒扩散、
 合成三相纤维化、S1–S2（含 extras 240/200/190 ms），标定健康 CV≈0.70 mm/ms，并引入<strong>要求再兴奋周期</strong>的 VA 分类，
 以避免平台期 / 单圈假阳性。因健康波长≈175 mm 远大于小圆盘≈24 mm，默认采用钉扎环（路径≈107 mm），
-快速相图得到 <strong>1 VA / 3 Non-VA</strong>。本报告汇总证据链、图件与局限；<strong>不是</strong>三维 DOX 孪生复现。</p>
+完整 4×3 环相图得到 <strong>VA 3 / Non-VA 9</strong>（快扫子集曾为 1/3）。本报告汇总证据链、图件与局限；<strong>不是</strong>三维 DOX 孪生复现。</p>
 """,
         "background": """
 <p><strong>研究动机。</strong>化疗心毒性传统关注射血分数下降；组织纤维化与电重构亦可形成折返基质。
@@ -355,7 +356,7 @@ LBM–GPU 单域；对 λ 与扩散做参数扫描，报告纤维化底物可诱
 <li>P0：修复门控 dt、引入 λ-MS、CV 标定、守恒扩散、S1–S2。</li>
 <li>发现小圆盘相图全 Non-VA → 波长审计（175 mm vs 24 mm）。</li>
 <li>改默认钉扎环；发现平台期假阳性 → 周期必需准则 + 单 CI 负对照测试。</li>
-<li>默认环相图稳定为 1 VA / 3 Non-VA；pytest 42 passed。</li>
+<li>完整 4×3 环相图得到 VA 3 / Non-VA 9；pytest 42 passed。</li>
 <li>SciencePlots 重绘；本脚本生成自包含 HTML/MD/PDF 研究报告。</li>
 </ol>
 """,
@@ -373,7 +374,7 @@ LBM–GPU 单域；对 λ 与扩散做参数扫描，报告纤维化底物可诱
 <li>开放 2D 修正 MS 单域脚手架可在无 LBM 源码时对齐关键协议要素。</li>
 <li>CV≈0.70 mm/ms 与 0D APD 黄金回归提供量级锚定。</li>
 <li>周期必需 VA 准则消除平台/单圈假阳性。</li>
-<li>波长感知环几何恢复混合相图（1 VA / 3 Non-VA）。</li>
+<li>波长感知环几何恢复混合相图（完整网格 VA 3 / Non-VA 9）。</li>
 <li>工作边界清晰：非 3D LBM、非猪 DOX 数据复现、非临床工具。</li>
 </ol>
 """,
@@ -381,7 +382,7 @@ LBM–GPU 单域；对 λ 与扩散做参数扫描，报告纤维化底物可诱
 <ul>
 <li>二维 FD ≠ 三维 LBM；无真实纤维场 / Purkinje / 双向域。</li>
 <li>合成纤维化 ≠ DOX 猪心肌 ≠ 缺血性 MI。</li>
-<li>完整 4×3 相图、Niederer/openCARP/MonoAlg3D 交叉验证仍为 P2（待补充）。</li>
+<li>Niederer/openCARP/MonoAlg3D 交叉验证仍为 P2（待补充）；圆盘全表 CSV「待补充」。</li>
 <li>ChatGPT 浏览器顾问会话因 Cursor 内置浏览器标签无法维持而未建立 URL（见 §十九）。</li>
 <li>各向异性传导仍为桩实现。</li>
 </ul>
@@ -557,16 +558,17 @@ def build_html(
   <section class="block" id="results">
     <h2>五、结果</h2>
     <h3>5.1 相图表（嵌入自 phase_diagram.csv）</h3>
-    <p><strong>表1. 钉扎环快速相图原始记录。</strong>
+    <p><strong>表1. 钉扎环相图原始记录（优先完整 4×3）。</strong>
     标签列 label 为协议输出；va=1 表示周期必需准则下的 VA。</p>
     {table_html}
     <p class="caption"><strong>表注：</strong>path_mm≈107 为环平均路径；tau_close=150 ms 保持健康复极时程设定。
     观察窗 observe_ms=1000。勿将 persist 单独等同于 VA。</p>
     <div class="explain">
       <h4>来龙去脉与读表说明</h4>
-      <p>四行对应 λ∈{{0.01,0.3}} × D↓∈{{30%,90%}}。请同时看
-      <code>n_extra_cycles</code> 与 <code>n_probes_relapped</code>：VA 行应显示再兴奋证据；
-      Non-VA 行即使 persist 较长也可能是平台期。这是本脚手架相对“仅 persist≥1000”论文式简化终点的关键硬化。</p>
+      <p>完整网格为 λ∈{{0.01,0.1,0.2,0.3}} × D↓∈{{30%,70%,90%}}（12 行）。请同时看
+      <code>n_extra_cycles</code> 与 <code>n_probes_relapped</code>：VA 行应显示再兴奋证据
+      （可出现 persist&lt;1000 ms）；Non-VA 行即使 persist 较长也可能是平台期。
+      这是本脚手架相对“仅 persist≥1000”论文式简化终点的关键硬化。</p>
     </div>
     <h3>5.2 图件（SciencePlots，Base64 内嵌）</h3>
     {fig_html}
@@ -585,7 +587,7 @@ def build_html(
   <section class="block" id="limitations">
     <h2>八、局限与展望</h2>
     {sections['limitations']}
-    <p>展望：完整 4×3 扫描、各向异性守恒实现、openCARP/MonoAlg3D 交叉、在获得授权数据后的影像驱动几何——均标记为<strong>待补充</strong>。</p>
+    <p>展望：各向异性守恒实现、openCARP/MonoAlg3D 交叉、圆盘全表 CSV、在获得授权数据后的影像驱动几何——均标记为<strong>待补充</strong>。完整 4×3 环扫描已完成并嵌入表1。</p>
   </section>
 
   <footer>

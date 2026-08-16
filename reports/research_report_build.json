@@ -4,10 +4,10 @@
   "md": "E:\\Projects\\20260522-DOX-LBM_GPU\\reports\\research_report.md",
   "pdf": "E:\\Projects\\20260522-DOX-LBM_GPU\\reports\\research_report.pdf",
   "pdf_method": "headless browser print-to-pdf (msedge.exe)",
-  "html_bytes": 338866,
-  "md_bytes": 14809,
-  "pdf_bytes": 872819,
-  "n_phase_rows": 4,
+  "html_bytes": 352129,
+  "md_bytes": 15551,
+  "pdf_bytes": 908142,
+  "n_phase_rows": 12,
   "missing_figures": [],
   "has_data_uri": true
 }
