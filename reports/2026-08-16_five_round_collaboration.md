@@ -20,7 +20,8 @@
 | HTTPS URL | https://github.com/Coucou2016/DOX-LBM-GPU |
 | 分支 | `master` |
 | 起始 SHA | `1a9b12f18e660af4bf1b05580119cbd31702dc75` |
-| 本轮推送后 SHA | `2c769828fd77cc6892cc432c9611128aed0e9f6b` |
+| 论文/数据刷新 SHA | `2c769828fd77cc6892cc432c9611128aed0e9f6b` |
+| §十九 SHA 回填 commit | `81e952524e3a17cf4411dbadee59bf12ebdbbe38` |
 
 ---
 
