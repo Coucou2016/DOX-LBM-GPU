@@ -310,6 +310,18 @@ def main() -> int:
     (args.out_dir / "phase_diagram_summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
     )
+    # Curated mirror for the public paper tree — only full annulus grids,
+    # so smoke/fast runs cannot overwrite the 4×3 research CSV.
+    if args.geometry == "annulus" and spec["mode"] == "full":
+        papers_data = ROOT / "papers" / "data"
+        papers_data.mkdir(parents=True, exist_ok=True)
+        curated_csv = papers_data / "phase_diagram.csv"
+        curated_csv.write_text(csv_path.read_text(encoding="utf-8"), encoding="utf-8")
+        (papers_data / "phase_diagram_summary.json").write_text(
+            json.dumps(summary, indent=2), encoding="utf-8"
+        )
+        summary["curated_csv"] = str(curated_csv)
+        print(f"Wrote curated {curated_csv}")
     print(json.dumps(summary, indent=2))
     print(f"Wrote {csv_path}")
 

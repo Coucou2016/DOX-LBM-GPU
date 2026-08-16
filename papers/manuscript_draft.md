@@ -49,6 +49,7 @@ Doxorubicin (DOX)–associated diffuse fibrosis can create an arrhythmogenic sub
 - Campos et al., *Front Physiol* 2024：纤维化表示（cleft vs core/border）改变 VA 形态——写作上可仿“建模选择→诱发→形态”阶梯。  
 - Systematic fibrosis–reentry（*Sci. Rep.* 2024, doi:10.1038/s41598-024-62002-5）：诱导窗 + 观察窗的协议拆分。  
 - CinC 2025 ventricular twin 工作：S1–S2；折返定义为多圈闭路传播——与本仓库 cycle-required 终点同向。  
+- *J Physiol* 评述续篇（doi:10.1113/jp290582）：强调 DOX 基质呈 “maze-like” 传导几何；写作上可借其机制语言，但**不**把二维环相图夸大为猪 LV maze 定量复现。  
 - CardioMat / toolbox 类 methods 结构：管线→验证→应用边界。  
 - 经典 MS（Mitchell & Schaeffer 2003）；Djabella 等引入的 λ 兴奋性项；**注意** Corrado 等完整 mMS（λ:=v_gate、外向电流门控）与本文实现**不等同**。  
 - openCARP / MonoAlg3D / Niederer 验证基准：本仓库仅作 P2 指针（「待补充」交叉）。
@@ -123,7 +124,7 @@ Doxorubicin (DOX)–associated diffuse fibrosis can create an arrhythmogenic sub
 
 ### 4.4 Annulus inducibility phase diagram
 
-**完整 4×3 环网格**（论文 extras；τ_close=150 ms；nx=ny=64, dx=0.75 mm；路径 ≈106.8 mm）：**VA 3 / Non-VA 9**（耗时 ≈159.5 s）。见图 `fig_phase_diagram`。源数据：`papers/data/phase_diagram.csv`。
+**完整 4×3 环网格**（论文 extras；τ_close=150 ms；nx=ny=64, dx=0.75 mm；路径 ≈106.8 mm）：**VA 3 / Non-VA 9**（本会话再生耗时 ≈158.4 s）。见图 `fig_phase_diagram`。源数据：`papers/data/phase_diagram.csv`。
 
 | λ | D↓30% | D↓70% | D↓90% |
 |---|:-----:|:-----:|:-----:|
@@ -192,7 +193,7 @@ Self-contained HTML: `papers/manuscript.html`, `reports/research_report.html`.
 ## Assumptions or missing inputs
 
 - 英文全文润色与目标期刊格式锁定：「待补充」。  
-- ChatGPT 在线多轮顾问：本机 Cursor **无浏览器 MCP**（仅 `cursor-app-control`）；`open_resource` 打开 chatgpt.com 失败；五轮逻辑咨询以 WebSearch + 结构化顾问备忘完成并标注 fallback（见 `docs/chatgpt/round_*_notes.md`）。  
+- ChatGPT 在线多轮顾问：本会话 `cursor-ide-browser` 已可见，但 `browser_tabs` 新建标签后立即不可导航（`Browser view not found` / `No browser tab available`）；`open_resource` → chatgpt.com 仍报 `unknown agent`。五轮以 WebSearch + `docs/chatgpt/paste_pack_round_*.md` / `live_round_*.md` 完成并标注 fallback。  
 - 圆盘几何完整定量 CSV：「待补充」（机制预期已陈述）。  
 - 各向异性守恒 / 外部求解器交叉：P2「待补充」。
 

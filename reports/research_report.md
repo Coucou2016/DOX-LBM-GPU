@@ -166,11 +166,11 @@ seed=42：保证演示可复现，不是生物学重复。
 
 
 
-### 图2. 验证汇总：0D APD、均匀 2D CV、快速相图计数
+### 图2. 验证汇总：0D APD、均匀 2D CV、相图计数
 
-![验证汇总：0D APD、均匀 2D CV、快速相图计数](../papers/figures/fig_validation_summary.png)
+![验证汇总：0D APD、均匀 2D CV、相图计数](../papers/figures/fig_validation_summary.png)
 
-**图注：** 灰带为预设可接受带宽；CV 目标线 0.70 mm/ms；相图为钉扎环 2×2 快扫。
+**图注：** 灰带为预设可接受带宽；CV 目标线 0.70 mm/ms；相图计数同步自 phase_diagram_summary.json。
 
 #### 来龙去脉与读图说明
 
