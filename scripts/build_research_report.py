@@ -205,94 +205,119 @@ def figure_explanations_html() -> dict[str, str]:
     """Long teacher-like Chinese explanations (HTML paragraphs)."""
     return {
         "fig_ms_0d_ap": """
-<p><strong>故事从哪里来：</strong>在读 Villar-Valero 的三维 LBM 数字孪生之前，必须先确认“细胞级离子核”是否站得住。
-他们与本脚手架都采用修正 Mitchell–Schaeffer（MS；Mitchell &amp; Schaeffer 2003；Djabella λ 修正）。
+<p><strong>故事从哪里来：</strong>在读 Villar-Valero 等（doi:10.1113/jp288819）的三维 LBM 数字孪生之前，
+必须先确认“细胞级离子核”是否站得住。他们与本脚手架都采用修正 Mitchell–Schaeffer
+（MS；Mitchell &amp; Schaeffer 2003；Djabella 引入的兴奋性参数 λ）。
 零维（0D，zero-dimensional，无空间耦合）仿真把扩散关掉，只看刺激→去极→复极这条时间线，
-因此是整条管线最便宜、也最硬的黄金回归点。</p>
+因此是整条管线最便宜、也最硬的黄金回归点——任何后续 CV / 波长 / 折返争论，若 0D 漂了就失去共同坐标系。</p>
 <p><strong>为何画这张图：</strong>动作电位时程 APD<sub>90</sub>
-（action potential duration to 90% recovery）直接进入波长
-λ<sub>wave</sub>≈CV×APD。若 0D APD 漂了，后面所有“圆盘放不下波长 / 钉扎环刚好能折返”
-的几何讨论都会失锚。</p>
+（action potential duration to 90% recovery）直接进入波长设计式
+λ<sub>wave</sub>≈CV×APD。几何节用名义 APD=250 ms 估算健康波长≈175 mm；
+本图给出<strong>可回归的实测 0D APD</strong>（256.6 ms），两者必须分开报告，不能混用。</p>
 <p><strong>面板怎么读（教师逐步）：</strong></p>
 <ul>
-<li>横轴：时间（ms）；纵轴：归一化膜电位 u（无量纲，<em>不是</em> mV）。</li>
-<li>上升沿：刺激激活；平台与复极：决定 APD<sub>90</sub>。</li>
-<li>虚线：激活时刻与 APD 终点标记；本机黄金回归约 <strong>256.6 ms</strong>（容差 ±8 ms）。</li>
-<li>seed=42：保证演示可复现，不是生物学重复。</li>
+<li>横轴：时间（ms）；纵轴：归一化膜电位 u（无量纲，<em>不是</em> mV，也不是实验贴附电位）。</li>
+<li>上升沿：刺激激活；平台与复极：共同决定 APD<sub>90</sub>。</li>
+<li>虚线：激活时刻与 APD 终点标记；本机黄金回归 <strong>256.6 ms</strong>（容差 ±8 ms）。</li>
+<li>seed=42：保证演示可复现，<em>不是</em>生物学重复，也不是蒙特卡洛置信区间。</li>
+<li>与 λ 扫描的关系：本图是经典 MS（λ=0 对照族）时程；纤维化格子上的 λ&gt;0 会抬高内向电流阈值，
+但不改变“先钉死 0D 核再谈空间”的验证顺序。</li>
 </ul>
-<p><strong>常见误读：</strong>把这条曲线当成“已经证明折返”。0D 没有空间，谈不上折返；
-它只证明离子核与参考包一致。</p>
-<p><strong>结论：</strong>0D 端与 finitewave MS 包一致，为后续二维 CV 标定、波长估计与折返协议提供可信离子核。</p>
+<p><strong>常见误读：</strong>(1) 把这条曲线当成“已经证明折返”——0D 没有空间，谈不上折返；
+(2) 把 256.6 ms 直接代入三维猪 LV 声称“复现论文 APD”——论文用成像校准，本图只锁脚手架离子核。</p>
+<p><strong>与论文/评述的对话：</strong>Chabiniok &amp; Zaha（doi:10.1113/jp290313）强调 MS 便于个性化；
+我们这里先做的是更低一层的<strong>可测一致性</strong>：与 finitewave MS 包单步对齐，再进入二维。</p>
+<p><strong>结论：</strong>0D 端与参考 MS 包一致，为后续二维 CV 标定、波长估计与折返协议提供可信离子核。</p>
 """,
         "fig_validation_summary": """
-<p><strong>故事从哪里来：</strong>协议对齐需要三块独立证据同时成立：
-(1) 离子时程；(2) 健康传导速度量级；(3) 相图能同时给出 VA 与 Non-VA。
-任何一块单独通过都不够——例如 CV 对了但终点定义过松，仍会把平台期算成 VA。</p>
-<p><strong>为何画这张图：</strong>把三项验证压成一眼可读的总览，方便答辩/组会时先回答
-“脚手架有没有跑通到量级正确”，再进入单张机制图。</p>
+<p><strong>故事从哪里来：</strong>方法学论文的可信度不来自单点“好看”，而来自<strong>多闸门同时闭合</strong>。
+对本脚手架，至少需要三块独立证据：(1) 离子时程（0D APD）；(2) 健康传导速度量级（均匀 2D CV）；
+(3) 相图能同时给出 VA 与 Non-VA（说明终点+几何没有塌缩成全阴/全阳）。
+任何一块单独通过都不够——例如 CV 对了但终点过松，仍会把平台期算成 VA。</p>
+<p><strong>为何画这张图：</strong>把三项验证压成一眼可读的总览，方便答辩/组会先回答
+“脚手架有没有跑通到量级正确”，再进入单张机制图与 CSV 细表。它对应 Niederer 2011
+（doi:10.1098/rsta.2011.0139）所倡导的验证文化的<strong>轻量本地版</strong>：不是 N-version 组织基准，
+而是协议局部闸门。</p>
 <p><strong>面板怎么读（教师逐步）：</strong></p>
 <ul>
-<li><strong>左栏（0D APD）：</strong>灰带为预设可接受带宽；点应落在带内（≈256.6 ms）。</li>
+<li><strong>左栏（0D APD）：</strong>灰带为预设可接受带宽；点应落在带内（<strong>256.6 ms</strong>）。</li>
 <li><strong>中栏（均匀 2D CV）：</strong>灰带 0.55–0.85 mm/ms；虚线目标 <strong>0.70 mm/ms</strong>
-（数值上等于论文健康纤维向 ≈0.7 m/s）。CV 由标定扩散系数 D 得到。</li>
-<li><strong>右栏（相图计数）：</strong>钉扎环 λ×D 扫描计数；完整 4×3 为 <strong>VA 3 / Non-VA 9</strong>
-（快扫 2×2 子集曾为 1/3，与重叠格点一致）。若变成全 Non-VA，优先怀疑几何放不下波长；
-若变成全 VA，优先怀疑终点过松。</li>
+（数值上对应论文健康纤维向量级 ≈0.7 m/s）。本会话实测 <strong>0.703125 mm/ms</strong> @
+D=0.0465 mm²/ms。</li>
+<li><strong>右栏（相图计数）：</strong>钉扎环 λ×D 扫描；完整 4×3 为 <strong>VA 3 / Non-VA 9</strong>
+（快扫 2×2 子集曾为 1/3，与重叠格点一致）。若全 Non-VA，优先怀疑几何放不下波长；
+若全 VA，优先怀疑终点过松或 persist 规则滥用。</li>
 </ul>
-<p><strong>常见误读：</strong>把“灰带内”理解成临床精度。这里是方法学量级锚定，不是猪心实测拟合。</p>
-<p><strong>结论：</strong>离子时程、健康纤维向量级 CV、以及可同时出现正负标签的相图三者同屏成立。</p>
+<p><strong>常见误读：</strong>把“灰带内”理解成临床精度或猪心拟合优度。这里是方法学量级锚定，
+服务协议复现，不是影像–模型个性化误差条。</p>
+<p><strong>结论：</strong>离子时程、健康纤维向量级 CV、以及可同时出现正负标签的相图三者同屏成立；
+随后各图是对这三闸门的展开说明。</p>
 """,
         "fig_phase_diagram": """
-<p><strong>故事从哪里来：</strong>Villar-Valero 在三维个性化左室上对 λ 与传导做参数扫描。
-本图是同一问题在<strong>开放二维脚手架</strong>上的最小可解释对应物：不是复现猪 LV 定量结果，
-而是检验“终点 + 几何 + 离子/扩散参数”能否给出机制可讲的混合相图。</p>
+<p><strong>故事从哪里来：</strong>Villar-Valero 在三维个性化左室上对 λ 与传导做参数扫描（约 96 组）。
+本图是同一科学问题在<strong>开放二维脚手架</strong>上的最小可解释对应物：不是复现猪 LV 定量诱发比例，
+而是检验“终点 + 几何 + 离子/扩散参数”能否给出机制可讲的混合相图，从而让第三方审计协议。</p>
 <p><strong>为何默认是钉扎环而不是论文式小圆盘：</strong>
 健康 λ<sub>wave</sub>≈0.70×250≈<strong>175 mm</strong>；48²×0.5 mm 圆盘直径约 <strong>24 mm</strong>，
-几何上几乎必然全 Non-VA（阴性对照有用，但不适合当主相图）。钉扎环平均路径约 <strong>107 mm</strong>，
-夹在健康波长与强减速波长之间，才可能出现混合标签。</p>
+几何上几乎必然全 Non-VA（作为阴性对照有用，但不适合当主相图）。钉扎环平均路径约 <strong>107 mm</strong>
+（CSV 中 path_mm≈106.8），夹在健康波长与强减速波长之间，才可能出现混合标签。
+这是波长–几何一致性问题，不是“调参出阳性”。</p>
 <p><strong>面板怎么读（教师逐步）：</strong></p>
 <ul>
-<li>横轴：纤维化区扩散降幅 D<sub>fib</sub> reduction（传导变慢）。</li>
-<li>纵轴：兴奋性参数 λ<sub>fib</sub>（Djabella：抬高内向电流阈值；健康 0.01，0.3 近功能阻滞）。</li>
-<li>暖色=VA，冷色=Non-VA；本报告嵌入 <strong>完整 4×3（12 格）</strong>：VA 3 / Non-VA 9。</li>
-<li>VA 格点：λ=0.01×D↓70%、λ=0.01×D↓90%、λ=0.1×D↓30%。其中两格 persist&lt;1000 ms，
-说明 cycle-required 终点不依赖 persist 阈值。</li>
-<li>λ≥0.2 全 Non-VA；λ=0.1 在强减速下亦 Non-VA——勿外推为猪 LV 定量规律。</li>
+<li>横轴：纤维化区扩散降幅 D<sub>fib</sub> reduction（传导变慢；0.3/0.7/0.9 对应降 30/70/90%）。</li>
+<li>纵轴：兴奋性参数 λ<sub>fib</sub>（抬高内向电流阈值；健康 0.01，0.3 近功能阻滞）。</li>
+<li>暖色=VA，冷色=Non-VA；本报告嵌入 <strong>完整 4×3（12 格）</strong>：<strong>VA 3 / Non-VA 9</strong>。</li>
+<li>VA 格点（务必对照表1）：λ=0.01×D↓70%（persist 666.7 ms，extra=1）；
+λ=0.01×D↓90%（persist 1000 ms，extra=2，relapped=3）；
+λ=0.1×D↓30%（persist 632.9 ms，extra=1）。两格 persist&lt;1000 ms，
+说明 cycle-required 终点<strong>不</strong>退化为 persist 阈值。</li>
+<li>λ≥0.2 全 Non-VA；λ=0.1 在强减速下亦 Non-VA——可作机制讨论素材，
+<strong>禁止</strong>外推为猪 LV 或临床 DOX 的定量规律。</li>
 </ul>
-<p><strong>与表1对照：</strong>读图时必须同时看 <code>n_extra_cycles</code> / <code>n_probes_relapped</code>。
-仅 persist≥1000 ms 不够——平台滞留会被判 Non-VA。</p>
-<p><strong>结论：</strong>在要求再兴奋周期的 VA 准则下，完整相图是机制可解释的混合结果（3/9），而不是“全阴/全阳”假象。</p>
+<p><strong>与表1 / maze 评述对照：</strong>读图必须同时看 <code>n_extra_cycles</code> /
+<code>n_probes_relapped</code>。仅 persist≥1000 ms 会把平台滞留判成 VA。
+doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图只证明二维协议可审计，
+不是 maze 走廊的定量复现。</p>
+<p><strong>结论：</strong>在要求再兴奋周期的 VA 准则下，完整相图是机制可解释的混合结果（3/9），
+而不是“全阴/全阳”假象；创新点在终点与几何硬化，不在“发现新致心律失常药物机制”。</p>
 """,
         "fig_diffusion_compare": """
 <p><strong>故事从哪里来：</strong>单域方程的扩散项在数学上应是守恒形式 ∇·(D∇u)。
-许多原型代码在均匀 D 时写 D∇²u 没问题，但一旦 D 空间变化（纤维化降导），捷径算子会引入非守恒误差，
-可能改变局部电流与激活持续。</p>
+许多原型代码在均匀 D 时写 D∇²u 没问题（此时两者等价），但一旦 D 空间变化（纤维化降导），
+捷径算子会引入非守恒误差，可能改变局部电紧张电流与激活持续。纤维化相图正好是异质 D 场景，
+因此必须把算子选择写成方法学声明，而不是实现细节。</p>
 <p><strong>为何画这张图：</strong>把“数值诚实性”做成可看证据：异质 D 下两算子的 persist 是否一致；
-标签会不会翻转。这不是炫技，而是告诉审稿人：我们默认用守恒格式，并量化捷径风险。</p>
+标签会不会翻转。这不是炫技，而是告诉审稿人/合作者：我们默认用守恒格式，并量化捷径风险。
+它与 CV 标定、VA 终点并列，属于 reproducibility 证据链的一环。</p>
 <p><strong>面板怎么读（教师逐步）：</strong></p>
 <ul>
-<li>分组柱：不同耦合间期 CI（coupling interval）。</li>
-<li>比较量：激活持续时长 persist（ms），不是直接的空间误差范数。</li>
+<li>分组柱：不同耦合间期 CI（coupling interval）——早搏越早，传导越脆弱，算子误差更容易被放大。</li>
+<li>比较量：激活持续时长 persist（ms），不是 L2 空间误差范数；选择 persist 是因为下游 VA 规则会读它。</li>
 <li>观察：persist 可差数十毫秒；在本协议下标签未必翻转——说明终点有时对算子误差不敏感，
 <strong>但不能</strong>据此声称捷径永远安全。</li>
+<li>与 CFL 的关系：显式格式还受 Δt≤Δx²/(4D_max) 与离子上限 0.1 ms 约束；算子错误与稳定条件是两件不同的事。</li>
 </ul>
-<p><strong>常见误读：</strong>“标签没翻 = 两算子等价”。不等价；只是本网格/本终点下未跨过分类阈值。</p>
-<p><strong>结论：</strong>脚手架默认守恒扩散；对照实验保留为异质介质下的数值诚实性证据。</p>
+<p><strong>常见误读：</strong>“标签没翻 = 两算子等价”。不等价；只是本网格/本终点下未跨过分类阈值。
+换观察窗、换几何或换 require_cycle 规则后，差异可能变成标签翻转。</p>
+<p><strong>结论：</strong>脚手架默认守恒扩散；对照实验保留为异质介质下的数值诚实性证据，并写入 ASSUMPTIONS。</p>
 """,
         "fig_mono2d_u": """
-<p><strong>故事从哪里来：</strong>读者在看完 0D 与相图后，仍可能怀疑“二维求解器是否真的在空间上传波”。
-本快照给出最短的视觉确认：均匀组织、无纤维化、短时程终态的膜电位场。</p>
+<p><strong>故事从哪里来：</strong>读者在看完 0D 与相图后，仍可能怀疑“二维求解器是否真的在空间上传波”，
+或者误以为相图只是标量脚本。本快照给出最短的视觉确认：均匀组织、无纤维化、短时程终态的膜电位场。</p>
 <p><strong>为何画这张图：</strong>它是管线烟雾测试（smoke test）的空间证据，
-证明 <code>ms_2d</code> 求解器在跑，而不是只输出标量指标。</p>
+证明 <code>ms_2d</code> 求解器在跑，而不是只输出 CSV 标量。对 methods 论文而言，
+“能看见场”降低了审稿人对黑箱指标的不信任，但<strong>不能</strong>单独承担科学结论。</p>
 <p><strong>面板怎么读（教师逐步）：</strong></p>
 <ul>
-<li>颜色：归一化膜电位 u∈[0,1]。</li>
-<li>几何：均匀二维单域；本图<strong>无</strong>纤维化掩膜。</li>
-<li>时相：短时程终态快照——用于可视检查，不是诱发协议窗口。</li>
+<li>颜色：归一化膜电位 u∈[0,1]（与 0D 图同一无量纲约定）。</li>
+<li>几何：均匀二维单域；本图<strong>无</strong>纤维化掩膜、无钉扎孔——因此看不到环上折返结构是正常的。</li>
+<li>时相：短时程终态快照——用于可视检查，不是 S1–S2 诱发协议的观察窗截图。</li>
+<li>与相图的分工：相图回答“参数格子上 VA 是否发生”；本图只回答“空间求解器是否在传波”。</li>
 </ul>
 <p><strong>严禁过度解读：</strong>本图<strong>不是</strong>折返阳性证据，也<strong>不能</strong>替代 S1–S2 + 周期准则 + 相图。
-若只展示漂亮的 u 场却不做终点硬化，会重复早期“平台期假阳性”陷阱。</p>
-<p><strong>结论：</strong>2D 求解器可运行；折返结论必须以协议分类与相图为准。</p>
+若只展示漂亮的 u 场却不做终点硬化，会重复早期“平台期假阳性”陷阱，也会与 Chabiniok–Zaha
+“打开方法”的精神相反——打开方法要求终点可审计，而不是图像好看。</p>
+<p><strong>结论：</strong>2D 求解器可运行；折返结论必须以协议分类与相图（表1 + 图3）为准。</p>
 """,
     }
 
@@ -307,84 +332,99 @@ def prose_sections() -> dict[str, str]:
 Villar-Valero 等（STACOM 2024 / <em>J Physiol</em> 2025，doi:10.1113/jp288819）用 MRI 个性化三维左室、
 修正 Mitchell–Schaeffer（MS，含兴奋性参数 λ）与 GPU 格子 Boltzmann（LBM，Lattice–Boltzmann Method）单域求解器，
 在纤维化兴奋性与传导参数空间扫描诱发性。Chabiniok &amp; Zaha（doi:10.1113/jp290313）评述强调：数字孪生要走向临床，
-需“打开方法”（可复现、可本地运行、可让临床科学家参与）。</p>
-<p>当该 LBM–GPU 源码不可用时，本仓库提供开放的 <strong>CPU 二维有限差分单域脚手架</strong>：对齐修正 MS、守恒扩散、
-合成三相纤维化、S1–S2（含 extras 240/200/190 ms），标定健康 CV≈0.70 mm/ms，并引入<strong>要求再兴奋周期</strong>的 VA 分类，
-以避免平台期 / 单圈假阳性。因健康波长≈175 mm 远大于小圆盘≈24 mm，默认采用钉扎环（路径≈107 mm），
-完整 4×3 环相图得到 <strong>VA 3 / Non-VA 9</strong>（快扫子集曾为 1/3）。本报告汇总证据链、图件与局限；<strong>不是</strong>三维 DOX 孪生复现。</p>
+需“打开方法”（可复现、可本地运行、可让临床科学家参与）。maze-like 基质评述见 doi:10.1113/jp290582。</p>
+<p>当该 LBM–GPU 源码不可用时，本仓库提供开放的 <strong>CPU 二维有限差分单域脚手架</strong>：对齐修正 MS、守恒扩散
+∇·(D∇u)、合成三相纤维化、S1–S2（extras 240/200/190 ms），标定健康 CV=<strong>0.703 mm/ms</strong>
+（目标 0.70；带 0.55–0.85），并引入<strong>要求再兴奋周期</strong>的 VA 分类，以避免平台期 / 单圈假阳性。
+因健康波长≈175 mm 远大于小圆盘≈24 mm，默认采用钉扎环（路径≈107 mm）。
+完整 4×3 环相图得到 <strong>VA 3 / Non-VA 9</strong>（快扫子集曾为 1/3；两格 VA 的 persist&lt;1000 ms）。
+0D APD<sub>90</sub> 黄金回归 <strong>256.6 ms</strong>。本报告汇总证据链、图件与局限；
+<strong>不是</strong>三维 DOX 孪生复现，也<strong>不</strong>声称 ICD 临床效用。</p>
 """,
         "background": """
 <p><strong>研究动机。</strong>化疗心毒性传统关注射血分数下降；组织纤维化与电重构亦可形成折返基质。
-个性化心脏数字孪生（digital twin）把影像解剖与电生理方程结合，用于虚拟诱发试验。</p>
+个性化心脏数字孪生（digital twin）把影像解剖与电生理方程结合，用于虚拟诱发试验，从而在参数空间上追问：
+兴奋性、传导与纤维化几何如何共同决定 VA 可诱发性。</p>
 <p><strong>Villar-Valero 做了什么。</strong>猪 DOX 模型 + MRI/LGE 三维左室；修正 MS（Djabella λ）；
-LBM–GPU 单域；对 λ 与扩散做参数扫描，报告纤维化底物可诱发恶性 VA。其贡献是<strong>成像驱动的三维个性化孪生与高通量扫描</strong>。</p>
+LBM–GPU 单域；对 λ 与扩散做参数扫描（报道约 96 组），报告纤维化底物可诱发恶性 VA。
+其贡献是<strong>成像驱动的三维个性化孪生与高通量扫描</strong>，而非开放可重跑的求解器源码。</p>
 <p><strong>Chabiniok–Zaha 强调什么。</strong>孪生潜力大，但建模方法与临床落地之间仍有鸿沟；下一步应开放方法、
-降低使用门槛，并推进更大规模验证。</p>
+降低使用门槛，并推进更大规模验证。评述亦指出猪模型 9 周纤维化可能重于典型患者 DOX 毒性——这限制跨物种外推。
+ICD 患者选择的临床效用“尚未确立”。</p>
 <p><strong>本脚手架的定位。</strong>在求解器源码缺失时，提供可 pytest 的协议对齐层：离子律、刺激协议、
 终点定义、波长–几何一致性与扩散算子诚实性。它回答“协议能否在开放 2D 上被压力测试”，
 而不是“能否复现猪 LV 的 LBM 定量结果”。</p>
-<p><strong>文献写作架构建议（独立检索，ChatGPT 浏览器会话未建立）：</strong>
+<p><strong>文献写作架构（WebSearch + 仓库笔记；本环境无浏览器 MCP 自动粘贴 ChatGPT）：</strong>
 (1) Villar-Valero 2025——参数扫描与 VA 终点主叙事；
 (2) Chabiniok &amp; Zaha 评述——转化框架；
-(3) Campos 等 Frontiers Physiol 2024（纤维化表示影响 VA 形态，openCARP）——方法对照与纤维化建模选择；
-(4) CardioMat / Comput Biol Med 2024——工具箱式 methods 论文结构；
-(5) 验证导向的 mono-domain / openCARP 类方法文——CFL、黄金测试、代码可用性专节。
+(3) Campos 等 <em>Front Physiol</em> 2024（doi:10.3389/fphys.2024.1370795）——纤维化表示→VA 形态；
+(4) <em>Sci. Rep.</em> 2024（doi:10.1038/s41598-024-62002-5）——诱导窗/观察窗拆分；
+(5) Niederer 2011（doi:10.1098/rsta.2011.0139）——验证文化指针；
+(6) CardioMat / <em>Comput Biol Med</em> 2024——工具箱式 methods 结构。
 目标期刊宜偏 methods / 计算生理，而非旗舰 <em>Nature</em>。</p>
 """,
         "aims": """
 <ol>
-<li>实现并验证含 λ 的修正 MS 与守恒二维单域。</li>
-<li>将均匀组织 CV 标定到论文健康纤维向量级（≈0.70 mm/ms）。</li>
-<li>对齐 S1–S2 与 extras，硬化 VA 终点（周期必需）。</li>
-<li>用波长感知几何获得可解释的混合相图。</li>
-<li>用 SciencePlots + TNR/CJK 字体输出可嵌入报告的出版风格图。</li>
+<li>实现并验证含 λ 的修正 MS 与守恒二维单域（∇·(D∇u)）。</li>
+<li>将均匀组织 CV 标定到论文健康纤维向量级（本会话 0.703 mm/ms @ D=0.0465）。</li>
+<li>对齐 S1–S2 与 extras，硬化 VA 终点（周期必需；拒绝平台/单圈假阳性）。</li>
+<li>用波长感知几何（环路径≈107 mm vs 健康波长≈175 mm）获得可解释的混合相图。</li>
+<li>用 SciencePlots + TNR/CJK（SimHei/YaHei）输出可嵌入报告的出版风格图，并生成自包含 HTML/PDF。</li>
 </ol>
 """,
         "data_methods": """
 <p><strong>数据。</strong>本阶段以合成几何与合成三相纤维化为主；未下载 Zenodo 多 GB 猪 MI 数据
-（且 MI≠DOX）。外部求解器 MonoAlg3D 仅作指针，未在本机 CUDA 全编译。</p>
-<p><strong>方程。</strong>单域反应–扩散：∂t u = ∇·(D∇u) + J_in(h,u,λ) − u/τ_out + J_stim；
-门控 h 按 u 与 u_gate 在 open/close 之间切换。健康 λ=0.01；纤维化扫描 λ∈{0.01,0.1,0.2,0.3}。</p>
-<p><strong>数值。</strong>显式欧拉 + 五点守恒扩散；CFL：Δt≤Δx²/(4D_max)，另离子上限 0.1 ms。
-刺激为区域电压钳（非论文电流脉冲）——差异已写入 ASSUMPTIONS。</p>
-<p><strong>协议。</strong>S1 BCL=400 ms，n=3；extras 默认 240/200/190 ms。VA 默认 require_cycle=True：
-仅 persist≥1000 ms 不算 VA；需 extra≥1 或 n_probes_relapped≥3。</p>
-<p><strong>几何。</strong>圆盘阴性对照 vs 钉扎环主相图（见结果节波长讨论）。</p>
+（且 MI≠DOX）。外部求解器 MonoAlg3D 仅作指针，未在本机 CUDA 全编译。公开仓库：
+<a href="https://github.com/Coucou2016/DOX-LBM-GPU">github.com/Coucou2016/DOX-LBM-GPU</a>。</p>
+<p><strong>方程。</strong>单域反应–扩散：
+∂t u = ∇·(D∇u) + [h u (u−λ)(u_max−u)]/τ_in − u/τ_out + J_stim；
+门控 h 在 u&lt;u_gate 时按 τ_open 开放，否则按 τ_close 关闭。健康 λ=0.01；
+纤维化扫描 λ∈{0.01,0.1,0.2,0.3}；环相图 τ_close=150 ms。单位：时间 ms，长度 mm，u/h/λ 无量纲。</p>
+<p><strong>数值。</strong>显式欧拉 + 面平均 D 的五点守恒扩散；CFL：Δt≤Δx²/(4D_max)，另离子上限 0.1 ms。
+刺激为区域电压钳（非论文电流脉冲）——差异已写入 <code>docs/ASSUMPTIONS.md</code>。</p>
+<p><strong>协议。</strong>S1 BCL=400 ms，n=3；extras 默认 240/200/190 ms；诱导窗与观察窗（默认 1000 ms）分离。
+VA 默认 require_cycle=True：仅 persist≥1000 ms 不算 VA；需 n_extra_cycles≥1 或 n_probes_relapped≥3。</p>
+<p><strong>几何。</strong>圆盘阴性对照（直径≈24 mm ≪ 175 mm）vs 钉扎环主相图（路径≈106.8 mm）。
+完整网格：λ×D 共 12 格，nx=ny=64，dx=0.75 mm。</p>
 """,
         "process": """
 <ol>
 <li>P0：修复门控 dt、引入 λ-MS、CV 标定、守恒扩散、S1–S2。</li>
 <li>发现小圆盘相图全 Non-VA → 波长审计（175 mm vs 24 mm）。</li>
 <li>改默认钉扎环；发现平台期假阳性 → 周期必需准则 + 单 CI 负对照测试。</li>
-<li>完整 4×3 环相图得到 VA 3 / Non-VA 9；pytest 42 passed。</li>
-<li>SciencePlots 重绘；本脚本生成自包含 HTML/MD/PDF 研究报告。</li>
+<li>完整 4×3 环相图得到 VA 3 / Non-VA 9（≈158 s）；pytest 42 passed；validation APD=256.6、CV=0.703。</li>
+<li>SciencePlots 重绘；完善论文英文稿与参考文献 DOI；本脚本生成自包含 HTML/MD/PDF 研究报告。</li>
+<li>ChatGPT：无浏览器 MCP 时，将 paste pack + 文稿推送 GitHub 供外部阅读；本地以 WebSearch 补文献。</li>
 </ol>
 """,
         "analysis": """
 <p><strong>与 Villar-Valero 的关系。</strong>共享：修正 MS+λ、单域思想、纤维化参数扫描、S1–S2 诱发逻辑。
 不共享：3D 猪 LV、LBM–GPU、真实 LGE 纤维化分布、临床级吞吐量。因此创新点应表述为
 <strong>开放可测的协议脚手架与终点/几何硬化</strong>，而非“首个 DOX 孪生”。</p>
-<p><strong>与 Chabiniok–Zaha 的关系。</strong>评述呼吁打开方法；本仓库以 CPU、pytest、文档化假设响应这一呼吁的
-“可复现入口”，但尚未提供临床 GUI，也未缩小影像–模型鸿沟。</p>
-<p><strong>平台期 vs 真折返。</strong>D↓90% 细胞上，单次早搏可出现 persist≥1000 但 extra=0（平台滞留）→ Non-VA；
-论文 extras 训练可出现再兴奋 → VA。二者共存说明终点定义必须写进方法学，否则相图不可比。</p>
+<p><strong>与 Chabiniok–Zaha 的关系。</strong>评述呼吁打开方法；本仓库以 CPU、pytest、文档化假设、公开 GitHub
+响应“可复现入口”，但尚未提供临床 GUI，也未缩小影像–模型鸿沟。猪 9 周纤维化偏重的提醒，
+进一步禁止把二维环相图写成患者风险工具。</p>
+<p><strong>平台期 vs 真折返。</strong>完整 CSV 中，VA 格点可有 persist=666.7 / 632.9 ms（&lt;1000）但 extra≥1；
+反之，平台滞留可 persist≥1000 而 extra=0 → Non-VA。二者共存说明终点定义必须写进方法学，否则相图不可比。</p>
+<p><strong>对 3D LBM 的诚实距离。</strong>二维 FD 省略跨壁结构、真实纤维各向异性与影像 maze 走廊；
+开放复现本身是贡献，但不能冒充三维性能或组织学保真。</p>
 """,
         "conclusions": """
 <ol>
 <li>开放 2D 修正 MS 单域脚手架可在无 LBM 源码时对齐关键协议要素。</li>
-<li>CV≈0.70 mm/ms 与 0D APD 黄金回归提供量级锚定。</li>
-<li>周期必需 VA 准则消除平台/单圈假阳性。</li>
+<li>CV=0.703 mm/ms 与 0D APD=256.6 ms 黄金回归提供量级锚定。</li>
+<li>周期必需 VA 准则消除平台/单圈假阳性，并允许 persist&lt;1000 的真再兴奋。</li>
 <li>波长感知环几何恢复混合相图（完整网格 VA 3 / Non-VA 9）。</li>
-<li>工作边界清晰：非 3D LBM、非猪 DOX 数据复现、非临床工具。</li>
+<li>工作边界清晰：非 3D LBM、非猪 DOX 数据复现、非临床 ICD 工具；开放可复现是 methods 贡献。</li>
 </ol>
 """,
         "limitations": """
 <ul>
 <li>二维 FD ≠ 三维 LBM；无真实纤维场 / Purkinje / 双向域。</li>
-<li>合成纤维化 ≠ DOX 猪心肌 ≠ 缺血性 MI。</li>
+<li>合成纤维化 ≠ DOX 猪心肌 ≠ 缺血性 MI（公开 MI 数据亦不能直接当作 DOX）。</li>
 <li>Niederer/openCARP/MonoAlg3D 交叉验证仍为 P2（待补充）；圆盘全表 CSV「待补充」。</li>
-<li>ChatGPT 浏览器顾问会话因 Cursor 内置浏览器标签无法维持而未建立 URL（见 §十九）。</li>
-<li>各向异性传导仍为桩实现。</li>
+<li>本 Cursor 代理工具目录无浏览器 MCP；ChatGPT 自动粘贴无法完成——文稿与 paste pack 已置于 GitHub 供外部阅读。</li>
+<li>各向异性传导仍为桩实现；英文全文润色与期刊格式锁定「待补充」。</li>
 </ul>
 """,
     }

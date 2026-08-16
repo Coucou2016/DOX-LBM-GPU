@@ -59,3 +59,9 @@ Regenerate: `python scripts/plot_science.py`
 - APD₉₀: 256.6 ms  
 - CV: 0.703125 mm/ms @ D=0.0465  
 - Full phase diagram: **VA 3 / Non-VA 9** (`papers/data/phase_diagram.csv`, mode=full)
+
+## Content maturation (same day, second pass)
+
+- Manuscript: structured EN Abstract (Background/Methods/Results/Conclusions); paragraph Intro; synthesised Related work with DOIs; Methods equations + units; References §7.  
+- Report: expanded teacher-style 来龙去脉 for Figs 1–5 in `scripts/build_research_report.py`.  
+- Boundary unchanged: not 3D LBM twin; MI≠DOX; open reproducibility = methods contribution.
