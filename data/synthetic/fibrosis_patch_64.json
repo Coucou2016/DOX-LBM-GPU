@@ -1,0 +1,37 @@
+{
+  "description": "Synthetic 64x64 fibrosis disk for mono2d benchmarks (binary + three-class)",
+  "nx": 64,
+  "ny": 64,
+  "units": {
+    "space": "mm (grid index * dx)",
+    "D": "mm^2/ms",
+    "time": "ms",
+    "u": "dimensionless",
+    "lambda": "dimensionless"
+  },
+  "geometry": {
+    "center_ij": [
+      32,
+      32
+    ],
+    "radius_cells": 8,
+    "fibrosis_fraction": 0.048095703125,
+    "border_width_px": 2,
+    "border_fraction": 0.037109375
+  },
+  "conductivity": {
+    "D_normal_mm2_per_ms": 0.0465,
+    "D_fibrosis_mm2_per_ms": 0.0046500000000000005,
+    "ratio_normal_to_fibrosis": 9.999999999999998
+  },
+  "modified_ms": {
+    "lambda_healthy": 0.01,
+    "lambda_dense": 0.2
+  },
+  "files": {
+    "mask": "fibrosis_patch_64_mask.npy",
+    "D": "fibrosis_patch_64_D.npy",
+    "classes": "fibrosis_patch_64_classes.npy",
+    "lam": "fibrosis_patch_64_lam.npy"
+  }
+}

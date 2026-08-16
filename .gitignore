@@ -1,0 +1,43 @@
+# Secrets / env
+.env
+.env.*
+*.pem
+credentials*.json
+**/secrets/
+
+# Python caches / envs
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+
+# Huge optional third-party (clone locally if needed; see README)
+MonoAlg3D_C-master/
+*.zip
+
+# Runtime dumps (keep curated figures/csv elsewhere)
+outputs/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Root demo PNG (regenerable); allow papers/figures
+*.png
+*.pdf
+!papers/figures/
+!papers/figures/**/*.png
+!papers/figures/**/*.pdf
+
+# Large binary arrays under data/synthetic (JSON metadata is tracked)
+data/synthetic/*.npy

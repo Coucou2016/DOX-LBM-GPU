@@ -1,0 +1,6 @@
+# Minimal stack verified on Windows (Python 3.13, no compiler needed).
+# Install MS model only (avoid full finitewave — breaks numpy/MSVC on this host):
+#   pip install -r requirements.txt
+finitewave-model-mitchell-schaeffer==0.6.0
+numpy>=1.26,<3
+SciencePlots>=2.1.0
