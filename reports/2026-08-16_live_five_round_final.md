@@ -21,7 +21,7 @@
 | HTTPS URL | **https://github.com/Coucou2016/DOX-LBM-GPU** |
 | 分支 | `master` |
 | 起始 SHA | `4bbc0599396a8e46509f3d90ebf6941623668c6a` |
-| 本轮推送后 SHA | （以 `git log -1` / GitHub 为准；见推送后回填） |
+| 本轮推送后 SHA | `51399df5d6b8679a5ee8cf5a19dfbe86b0064042` |
 
 **授权：** 用户 §2 允许策展代码/文档 commit+push（无 PR/deploy）。本轮推送含再生数据、报告、paste/live 笔记与 `run_phase_diagram.py` 策展镜像改进。
 
