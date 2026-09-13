@@ -1,0 +1,114 @@
+{
+  "generated_utc": "2026-09-13T16:57:05.547966+00:00",
+  "source": "Villar-Valero J Physiol 2025 healthy-tissue APD/CV anchors",
+  "acceptance": "\u00b110% for apd_matched_0d / cv_matched; CFL must be stable",
+  "phenotypes": [
+    {
+      "phenotype": "CONTROL",
+      "literature": {
+        "apd_ms_target": 309.0,
+        "cv_mm_per_ms_target": 0.71,
+        "cv_cm_per_s_target": 71.0,
+        "source": "Villar-Valero J Physiol 2025: healthy-tissue APD 309 ms; fiber-direction CV 71 cm/s"
+      },
+      "tau_close": 184.0,
+      "D_mm2_per_ms": 0.0465,
+      "lam": 0.01,
+      "apd_ms_measured": 309.1,
+      "apd_error_ms": 0.10000000000002274,
+      "apd_error_pct": 0.032362459546932926,
+      "apd_matched_0d": true,
+      "cv_mm_per_ms_measured": 0.7031250000000001,
+      "cv_error_mm_per_ms": -0.0068749999999998535,
+      "cv_error_pct": -0.968309859154909,
+      "cv_matched": true,
+      "cfl_r": 0.07440000000000001,
+      "dt_ms": 0.1,
+      "u_max": 0.8926737040206542,
+      "preset_tau_close": 184.0,
+      "preset_D_mm2_per_ms": 0.0465,
+      "apd_fit": null,
+      "cv_fit": {
+        "D_star": 0.0465,
+        "n_samples": 1
+      },
+      "match_tol_frac": {
+        "apd": 0.1,
+        "cv": 0.1
+      },
+      "notes": "0D APD via tau_close=184 \u2248309 ms (Villar-Valero control). Homogeneous CV at scaffold D_HEALTHY \u22480.70 mm/ms vs target 0.71."
+    },
+    {
+      "phenotype": "DOX1",
+      "literature": {
+        "apd_ms_target": 269.0,
+        "cv_mm_per_ms_target": 0.41,
+        "cv_cm_per_s_target": 41.0,
+        "source": "Villar-Valero: DOX1 healthy-tissue APD 269 ms (\u221212.9%); CV 41 cm/s (\u221242.3%)"
+      },
+      "tau_close": 159.0,
+      "D_mm2_per_ms": 0.016,
+      "lam": 0.01,
+      "apd_ms_measured": 268.5,
+      "apd_error_ms": -0.5,
+      "apd_error_pct": -0.18587360594795538,
+      "apd_matched_0d": true,
+      "cv_mm_per_ms_measured": 0.4245283018867927,
+      "cv_error_mm_per_ms": 0.014528301886792716,
+      "cv_error_pct": 3.5434882650713946,
+      "cv_matched": true,
+      "cfl_r": 0.0256,
+      "dt_ms": 0.1,
+      "u_max": 0.942945772778133,
+      "preset_tau_close": 159.0,
+      "preset_D_mm2_per_ms": 0.016,
+      "apd_fit": null,
+      "cv_fit": {
+        "D_star": 0.016,
+        "n_samples": 1
+      },
+      "match_tol_frac": {
+        "apd": 0.1,
+        "cv": 0.1
+      },
+      "notes": "tau_close=159 \u2192 0D APD\u2248269 ms. Homogeneous D scaled for CV\u22480.41 mm/ms; annulus d_reduction=0.90 remains a fibrosis-zone relative cut for VA scans."
+    },
+    {
+      "phenotype": "DOX2",
+      "literature": {
+        "apd_ms_target": 210.0,
+        "cv_mm_per_ms_target": 0.44,
+        "cv_cm_per_s_target": 43.89,
+        "source": "Villar-Valero: DOX2 healthy-tissue APD 210 ms (\u221232.0%); CV \u224843.89 cm/s (\u221238.2%)"
+      },
+      "tau_close": 138.0,
+      "D_mm2_per_ms": 0.0265,
+      "lam": 0.1,
+      "apd_ms_measured": 209.9,
+      "apd_error_ms": -0.09999999999999432,
+      "apd_error_pct": -0.04761904761904491,
+      "apd_matched_0d": true,
+      "cv_mm_per_ms_measured": 0.4411764705882355,
+      "cv_error_mm_per_ms": 0.0011764705882355009,
+      "cv_error_pct": 0.267379679144432,
+      "cv_matched": true,
+      "cfl_r": 0.0424,
+      "dt_ms": 0.1,
+      "u_max": 0.9361590205359779,
+      "preset_tau_close": 138.0,
+      "preset_D_mm2_per_ms": 0.0265,
+      "apd_fit": null,
+      "cv_fit": {
+        "D_star": 0.0265,
+        "n_samples": 1
+      },
+      "match_tol_frac": {
+        "apd": 0.1,
+        "cv": 0.1
+      },
+      "notes": "tau_close=138 at \u03bb=0.1 \u2192 0D APD\u2248210 ms; D=0.0265 \u2192 CV\u22480.44 mm/ms (matched within \u00b110% under stable CFL). Annulus d_reduction=0.70 for fibrosis zone."
+    }
+  ],
+  "all_apd_matched": true,
+  "all_cv_matched": true
+}

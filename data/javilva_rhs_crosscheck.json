@@ -1,5 +1,5 @@
 {
-  "note": "Found clone at E:\\Projects\\20260522-DOX-LBM_GPU\\_ext_dox_fibrosis (solver proprietary per their README).",
+  "note": "Cross-check vs local clone of javilva/doxorubicin_fibrosis_model under _ext_dox_fibrosis/ (solver proprietary per their README).",
   "javilva_default_tau_close": 189.0,
   "our_default_tau_close": 150.0,
   "rows": [

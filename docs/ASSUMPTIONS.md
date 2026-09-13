@@ -69,10 +69,11 @@
 
 - S1：BCL 400 ms，默认 3 个（测试可用 n_s1=1 以缩短时间）。
 - S2 及后续 extra：耦合间期相对前一心搏（论文 DOX1：240 / 200 / 190 ms）。
-- **双重终点**：`VA_paper` = persist≥1000 ms（Villar-Valero）；`VA_cycle`（默认 `label`）要求再兴奋：extra≥1 **或** `n_probes_relapped`≥3。仅 persist≥1000 ms **不算** `VA_cycle`；单圈各探针一次升支也不算。
+- **双重终点**：`VA_paper` = persist≥1000 ms **或** 周期证据（Villar-Valero 风格）；`VA_cycle`（默认 `label`）要求再兴奋：extra≥1 **或** `n_probes_relapped`≥3。仅 persist≥1000 ms **不算** `VA_cycle`；单圈各探针一次升支也不算。
 - 钉扎环是按波长设计的**验证几何**，不是生物学发现；二维相图**不应**复现三维诱发性比例（见手稿 Discussion §5.1）。
-- 刺激：`stimulus_mode="current"`（诱导脚本默认）或 `"voltage_clamp"`（遗留）。
+- 刺激：默认 **电流注入** `stimulus_mode="current"`；可选 `"voltage_clamp"`（遗留短回归）。
 - **负对照**：无纤维化均匀组织在默认协议下应为 Non-VA。
+- **相位奇点 / 转子尖端（辅助）**：`cardiac_ms/phase_singularity.py` 用 (u,h) 平面相位的拓扑荷检测 2D tip；`run_s1s2` 可选输出 `n_singularities` / `rotor_detected`。这是协议审计用的二维辅助指标，**不是**三维丝状体追踪，也**不是**临床转子诊断。
 - **波长 vs 几何（为何小圆盘不能当 Fig.5）**：
   - λ_wave ≈ CV × APD。健康：0.70 mm/ms × 250 ms ≈ **175 mm**。
   - 48² × 0.5 mm 盘片仅 **24 mm**，路径远小于波长 → 论文式圆盘相图只应作为 **阴性对照**（`--geometry disc`）。
@@ -108,3 +109,11 @@
 | 无纤维化 S1–S2 | Non-VA |
 
 完整 **Niederer 2011 立方体**、openCARP / MonoAlg3D 对照，以及 Zenodo 猪 MI 几何，见 `data/README.md`（P2，需自行下载，本机未拉多 GB 数据）。
+
+## 表型标定（CONTROL / DOX1 / DOX2）
+
+Villar-Valero 健康组织锚点：APD 309 / 269 / 210 ms；CV 71 / 41 / ≈44 cm/s。本仓库用 `tau_close` 标定 0D APD、用均匀片 `D` 标定 CV；`cv_matched` 仅在测量值落在目标 ±10% 且 CFL 稳定时为 True，否则保持 False 并在 `data/phenotype_calibration.json` 记录残差——**不**伪造 matched。
+
+## dx / dt 收敛
+
+`scripts/run_dx_convergence.py` 写出 `data/dx_convergence.csv` 与 `data/dt_convergence.csv`。用于数值验证，不是生物学结论。

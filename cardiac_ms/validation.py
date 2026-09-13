@@ -171,6 +171,8 @@ def _cv_probe_kwargs(**overrides: Any) -> dict[str, Any]:
         use_modified_ms=True,
         snapshots=False,
         lam=LAMBDA_HEALTHY,
+        stimulus_mode="current",
+        stim_u=0.8,
     )
     defaults.update(overrides)
     return defaults

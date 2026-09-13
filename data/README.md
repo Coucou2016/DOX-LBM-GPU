@@ -15,7 +15,7 @@
 | `synthetic/fibrosis_patch_64_lam.npy` | 节点 λ | 本地生成 |
 
 ```powershell
-cd E:\Projects\20260522-DOX-LBM_GPU
+# from repository root
 python scripts/generate_synthetic_data.py
 ```
 

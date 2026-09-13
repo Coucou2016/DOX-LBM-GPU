@@ -17,7 +17,7 @@
 
 **Background.** Doxorubicin (DOX)–associated diffuse fibrosis can create an arrhythmogenic substrate. Personalized 3D MRI-based left-ventricular models that couple a λ-modified Mitchell–Schaeffer (MS) ionic law to a GPU Lattice–Boltzmann (LBM) monodomain solver have mapped inducibility under fibrotic excitability and conduction changes. The cell model, parameters, and sample anatomy are publicly documented (e.g. `javilva/doxorubicin_fibrosis_model`), while the production LBM–GPU solver remains proprietary—blocking independent protocol audit on the closed twin pipeline.
 
-**Methods.** We release an open CPU 2D finite-difference monodomain **protocol/benchmark** that implements the same λ-modified MS law, conservative diffusion \(\nabla\cdot(D\nabla u)\), three-class synthetic fibrosis tissue, and an S1–S2 stimulation train aligned with published coupling intervals. Homogeneous conduction velocity (CV) is calibrated to **≈0.70 mm/ms** (acceptance band 0.55–0.85) at \(D=0.0465\,\mathrm{mm}^2/\mathrm{ms}\). Time steps respect a diffusion CFL bound and an ionic upper limit of \(0.1\,\mathrm{ms}\). We report **dual VA endpoints**: `VA_paper` (persist ≥ 1000 ms, Villar-Valero) and `VA_cycle` (require re-excitation: extra≥1 or relapped≥3). Because a nominal healthy wavelength (\(\mathrm{CV}\times\mathrm{APD}\approx0.70\times250\approx175\,\mathrm{mm}\)) exceeds small disc domains (~24 mm), we use a pinned annulus as a **verification geometry** designed via wavelength (path ≈107 mm), not as a biological discovery claim.
+**Methods.** We release an open CPU 2D finite-difference monodomain **protocol/benchmark** that implements the same λ-modified MS law, conservative diffusion \(\nabla\cdot(D\nabla u)\), three-class synthetic fibrosis tissue, and an S1–S2 stimulation train aligned with published coupling intervals. Homogeneous conduction velocity (CV) is calibrated to **≈0.70 mm/ms** (acceptance band 0.55–0.85) at \(D=0.0465\,\mathrm{mm}^2/\mathrm{ms}\). Time steps respect a diffusion CFL bound and an ionic upper limit of \(0.1\,\mathrm{ms}\); dx/dt convergence CSVs are numerical verification only. Default stimulus is **current injection** (`stimulus_mode="current"`). We report **dual VA endpoints** clearly: `VA_paper` = persist ≥ 1000 ms **or** cycle evidence (Villar-Valero-style); `VA_cycle` (default `label`) = require re-excitation (extra≥1 or relapped≥3). Optional 2D phase-singularity tip counts are auxiliary (not 3D filaments). Because a nominal healthy wavelength (\(\mathrm{CV}\times\mathrm{APD}\approx0.70\times250\approx175\,\mathrm{mm}\)) exceeds small disc domains (~24 mm), we use a pinned annulus as a **verification geometry** designed via wavelength (path ≈107 mm), not as a biological discovery claim.
 
 **Results.** Dual-endpoint counts on the annulus λ×D grid are reported from regenerated CSV (see Results tables). Zero-dimensional APD₉₀ equals **256.6 ms** under the classical MS golden regression. The annulus is a wavelength-designed verification circuit; disc geometry remains a negative control.
 
@@ -31,7 +31,7 @@
 
 **背景。** 阿霉素相关弥漫纤维化可构成致心律失常基质。个性化三维左室模型将 λ 修正 Mitchell–Schaeffer 与 GPU 格子 Boltzmann 单域求解器结合以扫描诱发性。细胞模型/参数/样例解剖可公开对照，但生产用 LBM–GPU 求解器仍为专有，独立组难以在封闭孪生管线上审计协议与终点。
 
-**方法。** 本文提供开放的 CPU 二维有限差分单域**协议/基准**：实现同一 λ 修正 MS、守恒扩散 \(\nabla\cdot(D\nabla u)\)、合成三相纤维化，以及与文献耦合间期对齐的 S1–S2。均匀 CV 标定至约 **0.70 mm/ms**。同时报告双重 VA 终点：`VA_paper`（persist≥1000 ms）与 `VA_cycle`（要求再兴奋）。名义健康波长约 175 mm 远大于小圆盘，故采用按波长设计的钉扎环作为**验证几何**（非生物学发现）。
+**方法。** 本文提供开放的 CPU 二维有限差分单域**协议/基准**：实现同一 λ 修正 MS、守恒扩散 \(\nabla\cdot(D\nabla u)\)、合成三相纤维化，以及与文献耦合间期对齐的 S1–S2。均匀 CV 标定至约 **0.70 mm/ms**。默认刺激为电流注入。同时报告双重 VA 终点：`VA_paper`（persist≥1000 ms **或** 周期证据）与 `VA_cycle`（要求再兴奋；默认 `label`）。可选二维相位奇点计数仅为辅助指标。名义健康波长约 175 mm 远大于小圆盘，故采用按波长设计的钉扎环作为**验证几何**（非生物学发现）。
 
 **结果。** 环网格双重终点计数见 Results 表（由再生 CSV 锁定）。0D APD₉₀ 黄金回归为 **256.6 ms**。
 
@@ -99,7 +99,7 @@ and an ionic ceiling \(\Delta t\le 0.1\,\mathrm{ms}\).
 
 ### 3.4 Tissue classes and stimuli
 
-Tissue is labeled healthy / border / dense fibrosis. Stimuli support `stimulus_mode="current"` (add \(J_{\mathrm{stim}}\); preferred for induction scripts) or `"voltage_clamp"` (legacy). Default S1: BCL = 400 ms, \(n=3\). Default extras (DOX1-aligned): 240 / 200 / 190 ms. Induction and observation windows are separated (default observe 1000 ms).
+Tissue is labeled healthy / border / dense fibrosis. Stimuli default to `stimulus_mode="current"` (add \(J_{\mathrm{stim}}\)); `"voltage_clamp"` remains available for legacy short regressions. Default S1: BCL = 400 ms, \(n=3\). Default extras (DOX1-aligned): 240 / 200 / 190 ms. Induction and observation windows are separated (default observe 1000 ms).
 
 ### 3.5 Dual VA endpoints
 
@@ -122,7 +122,9 @@ A \(48^2\times0.5\,\mathrm{mm}\) disc (~24 mm) is a negative control. The pinned
 
 ### 3.7 Verification suite
 
-Gates: pytest; 0D APD golden regression; homogeneous 2D CV band; full-domain diffusion-operator consistency; fibrosis-free Non-VA; annulus dual-endpoint phase diagram.
+Gates: pytest; 0D APD golden regression; homogeneous 2D CV band; full-domain diffusion-operator consistency; fibrosis-free Non-VA; annulus dual-endpoint phase diagram. Spatial/temporal convergence tables (`data/dx_convergence.csv`, `data/dt_convergence.csv`) document numerical sensitivity of CV under dx∈{0.75,0.5,0.25} mm and dt∈{0.1,0.05,0.025} ms—verification only, not biology. Optional 2D phase-singularity / tip counts (`n_singularities`, `rotor_detected`) are auxiliary protocol metrics on the final (u,h) snapshot; they are **not** 3D filament tracking.
+
+CONTROL/DOX1/DOX2 phenotype presets target Villar-Valero healthy-tissue APD (309/269/210 ms) and CV (71/41/≈44 cm/s); `cv_matched` is set only within ±10% under stable CFL (`scripts/calibrate_phenotypes.py` → `data/phenotype_calibration.json`).
 
 ### 3.8 Figure generation
 
@@ -140,7 +142,7 @@ Classical MS (seed = 42) yields APD₉₀ = **256.6 ms** (tolerance ±8 ms). Fig
 
 ### 4.2 Homogeneous 2D conduction velocity
 
-After calibrating \(D=0.0465\,\mathrm{mm}^2/\mathrm{ms}\), two-point CV on a homogeneous sheet is ≈**0.70 mm/ms** (band 0.55–0.85). Distance uses Euclidean `hypot`. Summary: `fig_validation_summary`.
+After calibrating \(D=0.0465\,\mathrm{mm}^2/\mathrm{ms}\), two-point CV on a homogeneous sheet is ≈**0.70 mm/ms** (band 0.55–0.85). Distance uses Euclidean `hypot`. Summary: `fig_validation_summary`. dx and dt convergence tables (`data/dx_convergence.csv`, `data/dt_convergence.csv`) confirm CV stability under grid/time refinement (numerical verification).
 
 ![Validation](figures/fig_validation_summary.png)
 

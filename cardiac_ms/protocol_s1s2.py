@@ -27,6 +27,7 @@ from cardiac_ms.constants import (
 )
 from cardiac_ms.metrics import summarize_lat_cv
 from cardiac_ms.ms_2d import simulate_mono2d
+from cardiac_ms.phase_singularity import detect_phase_singularities
 
 
 @dataclass
@@ -87,7 +88,7 @@ def dual_va_labels(
     """
     Report both literature and cycle-hardened VA endpoints.
 
-    - ``VA_paper``: Villar-Valero persist ≥ 1000 ms (or cycle evidence).
+    - ``VA_paper``: persist ≥ 1000 ms **or** cycle evidence (Villar-Valero-style).
     - ``VA_cycle``: require_cycle (extra≥1 or relapped≥3); default scaffold label.
     """
     kw = dict(
@@ -174,6 +175,7 @@ def run_s1s2(
     params: dict[str, float] | None = None,
     diffusion_mode: str = "auto",
     stimulus_mode: str = "current",
+    detect_singularities: bool = True,
     **kwargs: Any,
 ) -> dict[str, Any]:
     """
@@ -181,6 +183,10 @@ def run_s1s2(
 
     Default ``stimulus_mode=\"current\"`` (J_stim add during windows). Use
     ``voltage_clamp`` for legacy regression. Extra kwargs go to ``simulate_mono2d``.
+
+    When ``detect_singularities=True`` (default), appends auxiliary 2D tip metrics
+    ``n_singularities`` / ``rotor_detected`` from the final (u, h) snapshot
+    (not 3D filament tracking; see ``docs/ASSUMPTIONS.md``).
     """
     s1_region = kwargs.pop("s1_region", None)
     s2_region = kwargs.pop("s2_region", None)
@@ -245,6 +251,17 @@ def run_s1s2(
     label = str(dual["label"])
     lat_stats = summarize_lat_cv(meta["activation_ms"], dx)
 
+    n_sing = 0
+    rotor = False
+    sing_meta: dict[str, Any] | None = None
+    if detect_singularities:
+        mask = None
+        if tissue is not None and getattr(tissue, "conducting", None) is not None:
+            mask = np.asarray(tissue.conducting, dtype=bool)
+        sing_meta = detect_phase_singularities(u, h, mask=mask, method="uh")
+        n_sing = int(sing_meta["n_singularities"])
+        rotor = bool(sing_meta["rotor_detected"])
+
     return {
         "label": label,
         "VA_paper": dual["VA_paper"],
@@ -262,6 +279,9 @@ def run_s1s2(
         "t_end_ms": t_end,
         "reentry_threshold_ms": reentry_threshold_ms,
         "stimulus_mode": stimulus_mode,
+        "n_singularities": n_sing,
+        "rotor_detected": rotor,
+        "singularity": sing_meta,
         "u_max": float(meta.get("u_peak") or u.max()),
         "u_final_max": float(u.max()),
         "h_min": float(h.min()),

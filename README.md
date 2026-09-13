@@ -54,7 +54,7 @@ Outputs go to `outputs/` (gitignored).
 | Diffusion | Conservative `div(D∇u)` | Monodomain (LBM in twin) |
 | Healthy CV | Two-point ≈**0.70 mm/ms** (D=0.0465 mm²/ms) | Fiber ≈0.7 m/s |
 | S1 | BCL=400 ms, n=3 | Same |
-| **VA_paper** | Persist ≥ 1000 ms | Villar-Valero |
+| **VA_paper** | Persist ≥ 1000 ms **or** cycle evidence | Villar-Valero-style |
 | **VA_cycle** (default `label`) | extra≥1 **or** `n_probes_relapped`≥3 | Hardened endpoint |
 | Geometry | Wavelength-designed **pinned annulus** (verification), disc = negative control | 3D LV (not reproduced) |
 
@@ -62,7 +62,7 @@ Outputs go to `outputs/` (gitignored).
 
 Every S1–S2 / phase-diagram cell reports both:
 
-- `VA_paper` — literature persist ≥ 1000 ms rule  
+- `VA_paper` — persist ≥ 1000 ms **or** cycle evidence (Villar-Valero-style)  
 - `VA_cycle` — cycle-required (default classification / `label`)
 
 CSV columns include `VA_paper`, `VA_cycle`, `va_paper`, `va_cycle`.

@@ -330,7 +330,7 @@ def simulate_mono2d(
     extra_probes: list[tuple[int, int]] | None = None,
     snapshots: bool = True,
     diffusion_mode: str = "auto",
-    stimulus_mode: str = "voltage_clamp",
+    stimulus_mode: str = "current",
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
     """
     2D monodomain: du/dt = div(D ∇u) + ionic_rhs; gate h with explicit Euler.
@@ -341,8 +341,8 @@ def simulate_mono2d(
     If dt is None, picks suggest_dt_cfl from D_max. Set enforce_cfl=False to skip check.
     ``diffusion_mode``: ``auto`` / ``div`` both use ``diffusion_div_D_grad_neumann``;
     ``laplace`` is the legacy non-conservative ``D⊙∇²u`` path (corners fixed).
-    ``stimulus_mode``: ``voltage_clamp`` (set u in region) or ``current`` (add
-    stim_amp as J_stim during the window; preferred for induction scripts).
+    ``stimulus_mode``: default ``current`` (add stim_amp as J_stim during the
+    window); ``voltage_clamp`` sets u in the region (legacy / short regression).
     """
     if stimulus_mode not in ("voltage_clamp", "current"):
         raise ValueError(

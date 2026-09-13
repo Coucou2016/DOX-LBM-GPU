@@ -15,7 +15,15 @@ from cardiac_ms.ms_2d import (
 
 
 def _run_short(**kwargs):
-    defaults = dict(nx=40, ny=40, n_steps=1200, dx=0.5, enforce_cfl=True)
+    defaults = dict(
+        nx=40,
+        ny=40,
+        n_steps=1200,
+        dx=0.5,
+        enforce_cfl=True,
+        stimulus_mode="current",
+        stim_u=0.8,
+    )
     defaults.update(kwargs)
     return simulate_mono2d(**defaults)
 
@@ -49,6 +57,8 @@ def test_fibrosis_slows_conduction():
         dx=0.5,
         s2_window=(99999, 999999),
         s1_window=(5, 15),
+        stimulus_mode="current",
+        stim_u=0.8,
     )
     _, _, _, meta_homo = simulate_mono2d(fibrosis=False, **common)
     _, _, _, meta_fib = simulate_mono2d(fibrosis=True, **common)
@@ -89,6 +99,8 @@ def test_cfl_clamped_when_dt_too_large():
         enforce_cfl=True,
         s2_window=(99999, 999999),
         s1_window=(2, 8),
+        stimulus_mode="current",
+        stim_u=0.8,
     )
     assert meta["dt_clamped"] is True
     assert meta["cfl_r"] <= val.CFL_R_MAX_STABLE + 1e-6
