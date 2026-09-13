@@ -110,7 +110,11 @@ def run_cell_annulus(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "d_reduction": float(d_red),
         "d_fib_frac": 1.0 - float(d_red),
         "label": r["label"],
+        "VA_paper": r.get("VA_paper", r["label"]),
+        "VA_cycle": r.get("VA_cycle", r["label"]),
         "va": 1 if r["label"] == "VA" else 0,
+        "va_paper": 1 if r.get("va_paper") else 0,
+        "va_cycle": 1 if r.get("va_cycle") else 0,
         "activation_persists_ms": r["activation_persists_ms"],
         "n_extra_cycles": r["n_extra_cycles"],
         "n_probes_activated": r.get("n_probes_activated", 0),
@@ -128,6 +132,7 @@ def run_cell_annulus(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "dx": dx,
         "path_mm": r.get("path_mm"),
         "tau_close": r.get("tau_close_ring", TAU_CLOSE),
+        "stimulus_mode": r.get("stimulus_mode"),
     }
 
 
@@ -160,7 +165,11 @@ def run_cell_disc(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "d_reduction": float(d_red),
         "d_fib_frac": 1.0 - float(d_red),
         "label": r["label"],
+        "VA_paper": r.get("VA_paper", r["label"]),
+        "VA_cycle": r.get("VA_cycle", r["label"]),
         "va": 1 if r["label"] == "VA" else 0,
+        "va_paper": 1 if r.get("va_paper") else 0,
+        "va_cycle": 1 if r.get("va_cycle") else 0,
         "activation_persists_ms": r["activation_persists_ms"],
         "n_extra_cycles": r["n_extra_cycles"],
         "n_probes_activated": r.get("n_probes_activated", 0),
@@ -178,6 +187,7 @@ def run_cell_disc(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "dx": dx,
         "path_mm": None,
         "tau_close": TAU_CLOSE,
+        "stimulus_mode": r.get("stimulus_mode"),
     }
 
 
@@ -265,7 +275,9 @@ def main() -> int:
             row = run_cell_disc(nx, ny, dx, lam, d_red, spec)
         rows.append(row)
         print(
-            f"[{k}/{n_total}] lam={lam} D↓{100 * d_red:.0f}%  {row['label']}  "
+            f"[{k}/{n_total}] lam={lam} D↓{100 * d_red:.0f}%  "
+            f"cycle={row.get('VA_cycle', row['label'])} "
+            f"paper={row.get('VA_paper', '?')}  "
             f"persist={row['activation_persists_ms']:.1f} ms  extra={row['n_extra_cycles']}  "
             f"probes={row.get('n_probes_activated', 0)}  "
             f"relap={row.get('n_probes_relapped', 0)}  "
@@ -286,6 +298,8 @@ def main() -> int:
 
     n_va = sum(r["va"] for r in rows)
     n_non = n_total - n_va
+    n_va_paper = sum(int(r.get("va_paper", 0)) for r in rows)
+    n_va_cycle = sum(int(r.get("va_cycle", 0)) for r in rows)
     full_expected = None
     if n_total and spec["mode"] == "fast" and args.geometry == "annulus":
         full_expected = (elapsed / n_total) * (4 * 3) * (2430.0 / 1220.0)
@@ -298,6 +312,10 @@ def main() -> int:
         "n_cells": n_total,
         "n_va": n_va,
         "n_non_va": n_non,
+        "n_va_paper": n_va_paper,
+        "n_va_cycle": n_va_cycle,
+        "n_non_va_paper": n_total - n_va_paper,
+        "n_non_va_cycle": n_total - n_va_cycle,
         "elapsed_s": elapsed,
         "seconds_per_cell": elapsed / n_total if n_total else None,
         "full_grid_expected_s": full_expected,
@@ -306,6 +324,10 @@ def main() -> int:
         "wavelength_note": None if wave is None else wave.note,
         "tau_close_ms": TAU_CLOSE,
         "healthy_cv_band": "0.55-0.85 mm/ms (homogeneous sheet, same D)",
+        "endpoints": {
+            "VA_paper": "persist>=1000 ms (Villar-Valero)",
+            "VA_cycle": "extra>=1 or relapped>=3 (default label)",
+        },
     }
     (args.out_dir / "phase_diagram_summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"

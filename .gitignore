@@ -21,6 +21,7 @@ env/
 
 # Huge optional third-party (clone locally if needed; see README)
 MonoAlg3D_C-master/
+_ext_dox_fibrosis/
 *.zip
 
 # Runtime dumps (keep curated figures/csv elsewhere)

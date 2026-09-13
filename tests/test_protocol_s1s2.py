@@ -31,6 +31,16 @@ def test_classify_reentry_paper_threshold():
     )
 
 
+def test_dual_va_endpoints_disagree_on_plateau():
+    """Persist≥1000 without cycle → VA_paper but Non-VA under VA_cycle."""
+    from cardiac_ms.protocol_s1s2 import dual_va_labels
+
+    d = dual_va_labels(1000.0, n_extra_cycles=0, n_probes_relapped=0)
+    assert d["VA_paper"] == "VA"
+    assert d["VA_cycle"] == "Non-VA"
+    assert d["label"] == "Non-VA"
+
+
 def test_no_fibrosis_is_non_va():
     """Negative control: homogeneous sheet, default extras → Non-VA."""
     r = run_s1s2(

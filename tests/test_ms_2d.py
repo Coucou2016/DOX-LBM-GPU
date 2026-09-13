@@ -101,5 +101,49 @@ def test_constant_D_diffusion_operators_agree():
     dx = 0.5
     lap = laplacian_neumann(u, dx) * D0
     div = diffusion_div_D_grad_neumann(u, np.full_like(u, D0), dx)
-    err = np.max(np.abs(lap[1:-1, 1:-1] - div[1:-1, 1:-1]))
+    err = np.max(np.abs(lap - div))
     assert err < 1e-9
+
+
+def test_neumann_corners_defined():
+    """Corners must be finite (not left uninitialized / NaN)."""
+    rng = np.random.default_rng(1)
+    u = rng.random((16, 16))
+    dx = 0.5
+    lap = laplacian_neumann(u, dx)
+    div = diffusion_div_D_grad_neumann(u, np.ones_like(u), dx)
+    for arr in (lap, div):
+        assert np.isfinite(arr).all()
+        for corner in ((0, 0), (0, -1), (-1, 0), (-1, -1)):
+            assert np.isfinite(arr[corner])
+
+
+def test_diffusion_constant_field_zero_everywhere():
+    """Constant u ⇒ zero flux divergence on the entire domain (incl. corners)."""
+    u = np.full((20, 20), 0.37)
+    dx = 0.5
+    D = np.full_like(u, 0.8)
+    div = diffusion_div_D_grad_neumann(u, D, dx)
+    assert np.max(np.abs(div)) < 1e-12
+    lap = laplacian_neumann(u, dx)
+    assert np.max(np.abs(lap)) < 1e-12
+
+
+def test_constant_D_flux_operator_equivalence_full_domain():
+    """Constant D: D*laplacian_neumann ≡ diffusion_div_D_grad_neumann everywhere."""
+    rng = np.random.default_rng(11)
+    u = rng.standard_normal((28, 28))
+    dx = 0.4
+    D0 = 1.25
+    lap = laplacian_neumann(u, dx) * D0
+    div = diffusion_div_D_grad_neumann(u, np.full_like(u, D0), dx)
+    assert np.max(np.abs(lap - div)) < 1e-10
+
+
+def test_estimate_cv_uses_euclidean_hypot():
+    act = np.full((10, 10), np.nan)
+    act[2, 2] = 10.0
+    act[5, 6] = 20.0  # Δrow=3, Δcol=4 → dist=5*dx
+    cv = estimate_cv_from_activation(act, p0=(2, 2), p1=(5, 6), dx=0.5)
+    assert cv is not None
+    assert abs(cv - (5.0 * 0.5) / 10.0) < 1e-12

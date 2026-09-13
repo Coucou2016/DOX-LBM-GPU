@@ -83,12 +83,19 @@ def diffusion_div_D_grad_neumann(
 
 
 def laplacian_neumann(field: np.ndarray, dx: float, out: np.ndarray | None = None) -> np.ndarray:
-    """5-point Laplacian with zero-flux (Neumann) boundaries."""
+    """
+    5-point Laplacian with zero-flux (Neumann) boundaries, including corners.
+
+    Prefer ``diffusion_div_D_grad_neumann`` for production solves (constant ``D``
+    is equivalent). Kept for operator comparisons and
+    ``diffusion_mode=\"laplace\"``. Corners use the two-neighbor Neumann stencil
+    matching constant-D flux divergence.
+    """
     if out is None:
         out = np.empty_like(field)
-    else:
-        out.fill(0.0)
+    out.fill(0.0)
     inv_dx2 = 1.0 / (dx * dx)
+    # Interior
     out[1:-1, 1:-1] = (
         field[:-2, 1:-1]
         + field[2:, 1:-1]
@@ -96,10 +103,26 @@ def laplacian_neumann(field: np.ndarray, dx: float, out: np.ndarray | None = Non
         + field[1:-1, 2:]
         - 4.0 * field[1:-1, 1:-1]
     ) * inv_dx2
-    out[0, 1:-1] = (field[1, 1:-1] - field[0, 1:-1]) * inv_dx2
-    out[-1, 1:-1] = (field[-2, 1:-1] - field[-1, 1:-1]) * inv_dx2
-    out[1:-1, 0] = (field[1:-1, 1] - field[1:-1, 0]) * inv_dx2
-    out[1:-1, -1] = (field[1:-1, -2] - field[1:-1, -1]) * inv_dx2
+    # Edge interiors (not corners): Neumann ghost ⇒ 3 neighbors (tangential + inward)
+    # matches constant-D flux divergence: (u_in + u_L + u_R - 3 u) / dx^2
+    out[0, 1:-1] = (
+        field[1, 1:-1] + field[0, :-2] + field[0, 2:] - 3.0 * field[0, 1:-1]
+    ) * inv_dx2
+    out[-1, 1:-1] = (
+        field[-2, 1:-1] + field[-1, :-2] + field[-1, 2:] - 3.0 * field[-1, 1:-1]
+    ) * inv_dx2
+    out[1:-1, 0] = (
+        field[1:-1, 1] + field[:-2, 0] + field[2:, 0] - 3.0 * field[1:-1, 0]
+    ) * inv_dx2
+    out[1:-1, -1] = (
+        field[1:-1, -2] + field[:-2, -1] + field[2:, -1] - 3.0 * field[1:-1, -1]
+    ) * inv_dx2
+    # Corners: two one-sided neighbors, zero exterior flux
+    # ≡ (u_e + u_n - 2 u_c) / dx^2  (matches constant-D flux divergence)
+    out[0, 0] = (field[0, 1] + field[1, 0] - 2.0 * field[0, 0]) * inv_dx2
+    out[0, -1] = (field[0, -2] + field[1, -1] - 2.0 * field[0, -1]) * inv_dx2
+    out[-1, 0] = (field[-1, 1] + field[-2, 0] - 2.0 * field[-1, 0]) * inv_dx2
+    out[-1, -1] = (field[-1, -2] + field[-2, -1] - 2.0 * field[-1, -1]) * inv_dx2
     return out
 
 
@@ -234,6 +257,7 @@ def estimate_cv_from_activation(
     """
     Estimate conduction velocity (mm/ms) between two grid nodes from activation times.
 
+    Distance uses Euclidean ``hypot`` in grid indices × ``dx``.
     p0, p1 are (row, col). Returns None if either site never activated.
     """
     y0, x0 = p0
@@ -245,26 +269,28 @@ def estimate_cv_from_activation(
     dt_act = abs(t1 - t0)
     if dt_act < 1e-6 or dt_act > max_delay_ms:
         return None
-    dist = abs(x1 - x0) * dx if x0 != x1 else abs(y1 - y0) * dx
+    dist = float(np.hypot(y1 - y0, x1 - x0)) * dx
     if dist < 1e-9:
         return None
     return dist / dt_act
 
 
-def _stim_time(stim: Any) -> tuple[float, float, tuple[slice, slice], float]:
-    """Duck-type Stimulus or dict -> (t0, t1, region, stim_u)."""
+def _stim_time(stim: Any) -> tuple[float, float, tuple[slice, slice], float, float]:
+    """Duck-type Stimulus or dict -> (t0, t1, region, stim_u, stim_amp)."""
     if isinstance(stim, dict):
         return (
             float(stim["t_start_ms"]),
             float(stim["t_end_ms"]),
             stim["region"],
             float(stim.get("stim_u", 0.8)),
+            float(stim.get("stim_amp", stim.get("stim_u", 0.8))),
         )
     return (
         float(stim.t_start_ms),
         float(stim.t_end_ms),
         stim.region,
         float(getattr(stim, "stim_u", 0.8)),
+        float(getattr(stim, "stim_amp", getattr(stim, "stim_u", 0.8))),
     )
 
 
@@ -304,6 +330,7 @@ def simulate_mono2d(
     extra_probes: list[tuple[int, int]] | None = None,
     snapshots: bool = True,
     diffusion_mode: str = "auto",
+    stimulus_mode: str = "voltage_clamp",
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
     """
     2D monodomain: du/dt = div(D ∇u) + ionic_rhs; gate h with explicit Euler.
@@ -312,9 +339,15 @@ def simulate_mono2d(
     the classic finitewave RHS (λ=0 equivalent).
 
     If dt is None, picks suggest_dt_cfl from D_max. Set enforce_cfl=False to skip check.
-    ``diffusion_mode``: ``auto`` (div if D varies else D*laplace), ``div``, or
-    ``laplace`` (D⊙∇²u, non-conservative when D varies).
+    ``diffusion_mode``: ``auto`` / ``div`` both use ``diffusion_div_D_grad_neumann``;
+    ``laplace`` is the legacy non-conservative ``D⊙∇²u`` path (corners fixed).
+    ``stimulus_mode``: ``voltage_clamp`` (set u in region) or ``current`` (add
+    stim_amp as J_stim during the window; preferred for induction scripts).
     """
+    if stimulus_mode not in ("voltage_clamp", "current"):
+        raise ValueError(
+            f"stimulus_mode must be 'voltage_clamp' or 'current', got {stimulus_mode!r}"
+        )
     if D_normal is None:
         D_normal = float(D_HEALTHY_MM2_PER_MS)
     if D_fibrosis is None:
@@ -397,7 +430,7 @@ def simulate_mono2d(
             Dyy = np.where(mask, D_fibrosis if tissue is None else D, Dyy)
             Dxy = np.where(mask, 0.0, Dxy)
 
-    parsed_stim: list[tuple[float, float, tuple[slice, slice], float]] = []
+    parsed_stim: list[tuple[float, float, tuple[slice, slice], float, float]] = []
     if stimuli:
         parsed_stim = [_stim_time(s) for s in stimuli]
     else:
@@ -422,13 +455,13 @@ def simulate_mono2d(
     extra_was = [False] * len(extra)
     extra_upstrokes = np.zeros(len(extra), dtype=np.int32)
 
-    d_uniform = bool(np.allclose(D, D[0, 0]))
-    use_div = diffusion_mode == "div" or (
-        diffusion_mode == "auto" and (fibrosis or not d_uniform)
-    )
-    use_laplace_scaled = diffusion_mode == "laplace" or (
-        diffusion_mode == "auto" and not use_div
-    )
+    # Default / auto: always conservative flux form (constant D ≡ D∇²u with corners).
+    use_div = diffusion_mode in ("auto", "div")
+    use_laplace_scaled = diffusion_mode == "laplace"
+    if diffusion_mode not in ("auto", "div", "laplace"):
+        raise ValueError(
+            f"diffusion_mode must be auto|div|laplace, got {diffusion_mode!r}"
+        )
 
     activation_ms = np.full((ny, nx), np.nan, dtype=np.float64)
     lap_u = np.zeros_like(u)
@@ -442,23 +475,36 @@ def simulate_mono2d(
     active_post_steps = 0
     excited_frac_post_sum = 0.0
 
+    j_stim = np.zeros_like(u)
+
     for step in range(n_steps):
         t_now = step * dt
+        j_stim.fill(0.0)
         if parsed_stim:
-            for t0s, t1s, region, su in parsed_stim:
+            for t0s, t1s, region, su, samp in parsed_stim:
                 if t0s <= t_now < t1s:
                     sl_y, sl_x = region
-                    u[sl_y, sl_x] = su
+                    if stimulus_mode == "voltage_clamp":
+                        u[sl_y, sl_x] = su
+                    else:
+                        j_stim[sl_y, sl_x] = samp
         else:
             if s1_window[0] <= step < s1_window[1]:
                 sl_y, sl_x = s1_region  # type: ignore[misc]
-                u[sl_y, sl_x] = stim_u
+                if stimulus_mode == "voltage_clamp":
+                    u[sl_y, sl_x] = stim_u
+                else:
+                    j_stim[sl_y, sl_x] = stim_u
             if s2_window[0] <= step < s2_window[1]:  # type: ignore[index]
                 sl_y, sl_x = s2_region  # type: ignore[misc]
-                u[sl_y, sl_x] = stim_u
+                if stimulus_mode == "voltage_clamp":
+                    u[sl_y, sl_x] = stim_u
+                else:
+                    j_stim[sl_y, sl_x] = stim_u
 
         if not conducting.all():
             u[~conducting] = 0.0
+            j_stim[~conducting] = 0.0
 
         if anisotropy and Dxx is not None:
             diff_u = laplacian_anisotropic(u, dx, Dxx, Dyy, Dxy, out=lap_u)  # type: ignore[arg-type]
@@ -468,8 +514,8 @@ def simulate_mono2d(
             diff_u = laplacian_neumann(u, dx, out=lap_u)
             diff_u *= D
         else:
-            diff_u = laplacian_neumann(u, dx, out=lap_u)
-            diff_u *= D_normal
+            # Unreachable when diffusion_mode is validated; keep safe fallback.
+            diff_u = diffusion_div_D_grad_neumann(u, D, dx, out=lap_u)
 
         if use_modified_ms:
             rhs, dh = ionic_rhs_modified(
@@ -477,7 +523,7 @@ def simulate_mono2d(
             )
         else:
             rhs, dh = ionic_rhs_vectorized(u, h, p)
-        u = np.clip(u + dt * (diff_u + rhs), 0.0, 1.2)
+        u = np.clip(u + dt * (diff_u + rhs + j_stim), 0.0, 1.2)
         h = np.clip(h + dt * dh, 0.0, 1.0)
         if not conducting.all():
             u[~conducting] = 0.0
@@ -569,7 +615,8 @@ def simulate_mono2d(
         "lam_max": lam_max,
         "u_max_used": U_MAX,
         "use_modified_ms": use_modified_ms,
-        "diffusion_mode": diffusion_mode,
+        "diffusion_mode": "div" if use_div else diffusion_mode,
+        "stimulus_mode": stimulus_mode,
         "activation_ms": activation_ms,
         "cv_mm_per_ms": cv_mm_per_ms,
         "u_peak": u_peak,

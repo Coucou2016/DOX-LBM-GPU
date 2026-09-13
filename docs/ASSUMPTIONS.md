@@ -69,7 +69,9 @@
 
 - S1：BCL 400 ms，默认 3 个（测试可用 n_s1=1 以缩短时间）。
 - S2 及后续 extra：耦合间期相对前一心搏（论文 DOX1：240 / 200 / 190 ms）。
-- 分类：默认 `require_cycle=True`。仅 persist≥1000 ms **不算 VA**；S2 后波沿环走完一圈（各探针一次升支）也不算。VA 需要第二次兴奋：探针 extra≥1 **或** ≥3 个位点各 ≥2 次升支（`n_probes_relapped`）。`require_cycle=False` 才恢复论文 persist 准则。
+- **双重终点**：`VA_paper` = persist≥1000 ms（Villar-Valero）；`VA_cycle`（默认 `label`）要求再兴奋：extra≥1 **或** `n_probes_relapped`≥3。仅 persist≥1000 ms **不算** `VA_cycle`；单圈各探针一次升支也不算。
+- 钉扎环是按波长设计的**验证几何**，不是生物学发现；二维相图**不应**复现三维诱发性比例（见手稿 Discussion §5.1）。
+- 刺激：`stimulus_mode="current"`（诱导脚本默认）或 `"voltage_clamp"`（遗留）。
 - **负对照**：无纤维化均匀组织在默认协议下应为 Non-VA。
 - **波长 vs 几何（为何小圆盘不能当 Fig.5）**：
   - λ_wave ≈ CV × APD。健康：0.70 mm/ms × 250 ms ≈ **175 mm**。
@@ -90,7 +92,8 @@
 - 时间：显式欧拉（离子 + 扩散）
 - 激活时间：首次 `u ≥ 0.5` 的步时间
 - CV：两点直线距离 / 激活时差；局部 CV ≈ 1/|∇T|
-- 刺激：区域电压钳，而非论文的 J_stim 电流脉冲
+- 刺激：默认电流注入 `J_stim`（`stimulus_mode=current`）；可选区域电压钳
+- CV 两点距离：欧氏 `hypot(Δrow, Δcol) * dx`
 
 ## 参考验证（本仓库）
 

@@ -1,0 +1,33 @@
+# CONTROL / DOX1 / DOX2 phenotype anchors (Villar-Valero-aligned targets).
+# Load via cardiac_ms.phenotypes.get_phenotype(name).
+
+CONTROL:
+  tau_close: 150.0
+  lam: 0.01
+  D_mm2_per_ms: 0.0465
+  d_reduction: 0.0
+  extra_cis_ms: [240.0]
+  targets:
+    apd_ms: 250.0
+    cv_mm_per_ms: 0.70
+  notes: "0D APD≈256.6 ms; homogeneous CV calibrated ≈0.70 mm/ms."
+
+DOX1:
+  tau_close: 170.0
+  lam: 0.01
+  d_reduction: 0.90
+  extra_cis_ms: [240.0, 200.0, 190.0]
+  targets:
+    apd_ms: 280.0
+    cv_mm_per_ms: 0.50
+  notes: "0D APD via tau_close partial; 1D CV not fully matched."
+
+DOX2:
+  tau_close: 190.0
+  lam: 0.1
+  d_reduction: 0.70
+  extra_cis_ms: [260.0, 220.0, 200.0, 180.0]
+  targets:
+    apd_ms: 300.0
+    cv_mm_per_ms: 0.40
+  notes: "Further remodeling; 1D CV not fully matched."

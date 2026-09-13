@@ -126,15 +126,21 @@ def validate_0d_apd_golden(seed: int = 42, **kwargs: Any) -> dict[str, Any]:
 
 
 def validate_0d_restitution_tau_out() -> dict[str, Any]:
-    """Longer tau_out should not shorten APD below the shortest-case floor."""
+    """Longer tau_out must monotonically lengthen APD (ordering assert)."""
     results = []
     for tau_out in (4.0, 6.0, 10.0):
         t, u, _ = simulate_ms_0d(n_steps=5000, dt=0.1, params={"tau_out": tau_out}, seed=0)
         apd = measure_apd(t, u)
         results.append({"tau_out": tau_out, "apd_ms": apd.get("apd_ms")})
     apds = [r["apd_ms"] for r in results if r["apd_ms"] is not None]
-    ok = len(apds) == 3 and all(80 < a < 450 for a in apds)
-    return {"ok": ok, "sweep": results}
+    ok_count = len(apds) == 3
+    ok_range = ok_count and all(80 < a < 450 for a in apds)
+    ok_mono = ok_count and apds[0] < apds[1] < apds[2]
+    return {
+        "ok": bool(ok_count and ok_range and ok_mono),
+        "sweep": results,
+        "monotonic": bool(ok_mono),
+    }
 
 
 def validate_modified_ms_lambda0_matches_package(dt: float = 0.1, tol: float = 1e-12) -> dict[str, Any]:
@@ -245,17 +251,15 @@ def validate_2d_golden_regression(seed: int = 0) -> dict[str, Any]:
 
 
 def validate_diffusion_operator_consistency(dx: float = 0.5, D0: float = 0.8) -> dict[str, Any]:
-    """div(D grad u) with constant D must match D * Laplacian (Neumann)."""
+    """div(D grad u) with constant D must match D * Laplacian on the FULL domain."""
     rng = np.random.default_rng(0)
     u = rng.random((32, 32))
     D = np.full_like(u, D0)
     lap = laplacian_neumann(u, dx) * D0
     div = diffusion_div_D_grad_neumann(u, D, dx)
-    # laplacian_neumann leaves corners unset; compare interior only
-    interior = (slice(1, -1), slice(1, -1))
-    err = float(np.max(np.abs(lap[interior] - div[interior])))
+    err = float(np.max(np.abs(lap - div)))
     ok = err < 1e-9
-    return {"ok": ok, "max_abs_err": err}
+    return {"ok": ok, "max_abs_err": err, "compared": "full_domain"}
 
 
 def validate_cfl_math(dx: float = 0.5, D_max: float = 0.8) -> dict[str, Any]:

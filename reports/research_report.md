@@ -1,6 +1,6 @@
 # DOX 纤维化折返协议的开放二维单域脚手架：学术研究报告
 
-生成日期：2026-08-16 · 仓库：DOX-LBM_GPU · 性质：方法与验证研究报告（非临床决策工具）
+生成日期：2026-09-13 · 仓库：DOX-LBM_GPU · 性质：方法与验证研究报告（非临床决策工具）
 
 对照：Villar-Valero et al., J Physiol 2025 (doi:10.1113/jp288819)；Chabiniok & Zaha (doi:10.1113/jp290313)。
 相图摘要：VA=3 / Non-VA=9。
@@ -45,7 +45,7 @@ Villar-Valero 等（STACOM 2024 / J Physiol 2025，doi:10.1113/jp288819）用 MR
 
 Villar-Valero 做了什么。猪 DOX 模型 + MRI/LGE 三维左室；修正 MS（Djabella λ）；
 LBM–GPU 单域；对 λ 与扩散做参数扫描（报道约 96 组），报告纤维化底物可诱发恶性 VA。
-其贡献是成像驱动的三维个性化孪生与高通量扫描，而非开放可重跑的求解器源码。
+细胞模型/参数/样例解剖见公开仓库 javilva/doxorubicin_fibrosis_model；生产求解器仍为专有。
 
 
 Chabiniok–Zaha 强调什么。孪生潜力大，但建模方法与临床落地之间仍有鸿沟；下一步应开放方法、
@@ -53,39 +53,39 @@ Chabiniok–Zaha 强调什么。孪生潜力大，但建模方法与临床落地
 ICD 患者选择的临床效用“尚未确立”。
 
 
-本脚手架的定位。在求解器源码缺失时，提供可 pytest 的协议对齐层：离子律、刺激协议、
-终点定义、波长–几何一致性与扩散算子诚实性。它回答“协议能否在开放 2D 上被压力测试”，
+本脚手架的定位。开放二维协议/基准（Fibrosis-Reentry-MS2D）：离子律、刺激协议、
+双重 VA 终点（VA_paper/VA_cycle）、波长–几何一致性与扩散算子诚实性。它回答“协议能否在开放 2D 上被压力测试”，
 而不是“能否复现猪 LV 的 LBM 定量结果”。
 
 
-文献写作架构（WebSearch + 仓库笔记；本环境无浏览器 MCP 自动粘贴 ChatGPT）：
+文献写作架构：
 (1) Villar-Valero 2025——参数扫描与 VA 终点主叙事；
 (2) Chabiniok & Zaha 评述——转化框架；
 (3) Campos 等 Front Physiol 2024（doi:10.3389/fphys.2024.1370795）——纤维化表示→VA 形态；
 (4) Sci. Rep. 2024（doi:10.1038/s41598-024-62002-5）——诱导窗/观察窗拆分；
 (5) Niederer 2011（doi:10.1098/rsta.2011.0139）——验证文化指针；
-(6) CardioMat / Comput Biol Med 2024——工具箱式 methods 结构。
-目标期刊宜偏 methods / 计算生理，而非旗舰 Nature。
+(6) 公开细胞模型材料——协议对齐对照。
+目标期刊宜偏 methods / 计算生理。
 
 
 ### 2.2 目标
 
 - 实现并验证含 λ 的修正 MS 与守恒二维单域（∇·(D∇u)）。
 
-- 将均匀组织 CV 标定到论文健康纤维向量级（本会话 0.703 mm/ms @ D=0.0465）。
+- 将均匀组织 CV 标定到论文健康纤维向量级（≈0.70 mm/ms @ D=0.0465）。
 
-- 对齐 S1–S2 与 extras，硬化 VA 终点（周期必需；拒绝平台/单圈假阳性）。
+- 对齐 S1–S2 与 extras；报告双重 VA 终点（persist≥1000 与周期必需）。
 
-- 用波长感知几何（环路径≈107 mm vs 健康波长≈175 mm）获得可解释的混合相图。
+- 用波长感知验证几何（环路径≈107 mm vs 健康波长≈175 mm）获得可解释的混合相图。
 
-- 用 SciencePlots + TNR/CJK（SimHei/YaHei）输出可嵌入报告的出版风格图，并生成自包含 HTML/PDF。
+- 用 SciencePlots 输出可嵌入报告的出版风格图，并生成自包含 HTML/MD/PDF。
 
 
 ## 三、数据与方法
 
 数据。本阶段以合成几何与合成三相纤维化为主；未下载 Zenodo 多 GB 猪 MI 数据
-（且 MI≠DOX）。外部求解器 MonoAlg3D 仅作指针，未在本机 CUDA 全编译。公开仓库：
-github.com/Coucou2016/DOX-LBM-GPU。
+（且 MI≠DOX）。外部求解器 MonoAlg3D 仅作指针。公开仓库：
+github.com/Coucou2016/DOX-LBM-GPU（展示名 Fibrosis-Reentry-MS2D）。
 
 
 方程。单域反应–扩散：
@@ -94,15 +94,15 @@ github.com/Coucou2016/DOX-LBM-GPU。
 纤维化扫描 λ∈{0.01,0.1,0.2,0.3}；环相图 τ_close=150 ms。单位：时间 ms，长度 mm，u/h/λ 无量纲。
 
 
-数值。显式欧拉 + 面平均 D 的五点守恒扩散；CFL：Δt≤Δx²/(4D_max)，另离子上限 0.1 ms。
-刺激为区域电压钳（非论文电流脉冲）——差异已写入 docs/ASSUMPTIONS.md。
+数值。显式欧拉 + 面平均 D 的五点守恒扩散（含 Neumann 角点）；CFL：Δt≤Δx²/(4D_max)，另离子上限 0.1 ms。
+诱导脚本默认 stimulus_mode=current（亦可 voltage_clamp）。
 
 
 协议。S1 BCL=400 ms，n=3；extras 默认 240/200/190 ms；诱导窗与观察窗（默认 1000 ms）分离。
-VA 默认 require_cycle=True：仅 persist≥1000 ms 不算 VA；需 n_extra_cycles≥1 或 n_probes_relapped≥3。
+VA_paper：persist≥1000 ms；VA_cycle（默认 label）：需 n_extra_cycles≥1 或 n_probes_relapped≥3。
 
 
-几何。圆盘阴性对照（直径≈24 mm ≪ 175 mm）vs 钉扎环主相图（路径≈106.8 mm）。
+几何。圆盘阴性对照（直径≈24 mm ≪ 175 mm）vs 钉扎环验证几何（路径≈106.8 mm）。
 完整网格：λ×D 共 12 格，nx=ny=64，dx=0.75 mm。
 
 
@@ -114,11 +114,9 @@ VA 默认 require_cycle=True：仅 persist≥1000 ms 不算 VA；需 n_extra_cyc
 
 - 改默认钉扎环；发现平台期假阳性 → 周期必需准则 + 单 CI 负对照测试。
 
-- 完整 4×3 环相图得到 VA 3 / Non-VA 9（≈158 s）；pytest 42 passed；validation APD=256.6、CV=0.703。
+- Major Revision：双重 VA 终点、全域扩散测试、javilva RHS 交叉、MIT 打包；完整 4×3 环相图 VA_cycle 3 / Non-VA 9；pytest 47 passed。
 
-- SciencePlots 重绘；完善论文英文稿与参考文献 DOI；本脚本生成自包含 HTML/MD/PDF 研究报告。
-
-- ChatGPT：无浏览器 MCP 时，将 paste pack + 文稿推送 GitHub 供外部阅读；本地以 WebSearch 补文献。
+- SciencePlots 重绘；手稿定位为开放 2D 协议/基准；生成自包含 HTML/MD/PDF 研究报告。
 
 
 ## 五、结果
@@ -127,10 +125,10 @@ VA 默认 require_cycle=True：仅 persist≥1000 ms 不算 VA；需 n_extra_cyc
 
 | geometry | lambda_fib | d_reduction | label | va | activation_persists_ms | n_extra_cycles | n_probes_relapped | path_mm |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| annulus | 0.01 | 0.3 | Non-VA | 0 | 394.70000000000005 | 0 | 0 | 106.81415022205297 |
-| annulus | 0.01 | 0.7 | VA | 1 | 666.7000000000003 | 1 | 1 | 106.81415022205297 |
+| annulus | 0.01 | 0.3 | Non-VA | 0 | 394.60000000000014 | 0 | 0 | 106.81415022205297 |
+| annulus | 0.01 | 0.7 | VA | 1 | 666.5999999999999 | 1 | 1 | 106.81415022205297 |
 | annulus | 0.01 | 0.9 | VA | 1 | 1000.0 | 2 | 3 | 106.81415022205297 |
-| annulus | 0.1 | 0.3 | VA | 1 | 632.9000000000001 | 1 | 1 | 106.81415022205297 |
+| annulus | 0.1 | 0.3 | VA | 1 | 632.5 | 1 | 1 | 106.81415022205297 |
 | annulus | 0.1 | 0.7 | Non-VA | 0 | 0.0 | 0 | 0 | 106.81415022205297 |
 | annulus | 0.1 | 0.9 | Non-VA | 0 | 0.0 | 0 | 0 | 106.81415022205297 |
 | annulus | 0.2 | 0.3 | Non-VA | 0 | 0.0 | 0 | 0 | 106.81415022205297 |
@@ -212,7 +210,7 @@ seed=42：保证演示可复现，不是生物学重复，也不是蒙特卡洛�
 
 左栏（0D APD）：灰带为预设可接受带宽；点应落在带内（256.6 ms）。
 中栏（均匀 2D CV）：灰带 0.55–0.85 mm/ms；虚线目标 0.70 mm/ms
-（数值上对应论文健康纤维向量级 ≈0.7 m/s）。本会话实测 0.703125 mm/ms @
+（数值上对应论文健康纤维向量级 ≈0.7 m/s）。标定实测 0.703125 mm/ms @
 D=0.0465 mm²/ms。
 右栏（相图计数）：钉扎环 λ×D 扫描；完整 4×3 为 VA 3 / Non-VA 9
 （快扫 2×2 子集曾为 1/3，与重叠格点一致）。若全 Non-VA，优先怀疑几何放不下波长；
@@ -347,34 +345,34 @@ doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图�
 ## 六、分析与讨论
 
 与 Villar-Valero 的关系。共享：修正 MS+λ、单域思想、纤维化参数扫描、S1–S2 诱发逻辑。
-不共享：3D 猪 LV、LBM–GPU、真实 LGE 纤维化分布、临床级吞吐量。因此创新点应表述为
-开放可测的协议脚手架与终点/几何硬化，而非“首个 DOX 孪生”。
+不共享：3D 猪 LV、LBM–GPU、真实 LGE 纤维化分布。因此创新点应表述为
+开放可测的协议基准与终点/几何硬化，而非“首个 DOX 孪生”。
 
 
 与 Chabiniok–Zaha 的关系。评述呼吁打开方法；本仓库以 CPU、pytest、文档化假设、公开 GitHub
-响应“可复现入口”，但尚未提供临床 GUI，也未缩小影像–模型鸿沟。猪 9 周纤维化偏重的提醒，
+响应“可复现入口”，但尚未提供临床 GUI。猪 9 周纤维化偏重的提醒，
 进一步禁止把二维环相图写成患者风险工具。
 
 
-平台期 vs 真折返。完整 CSV 中，VA 格点可有 persist=666.7 / 632.9 ms（<1000）但 extra≥1；
-反之，平台滞留可 persist≥1000 而 extra=0 → Non-VA。二者共存说明终点定义必须写进方法学，否则相图不可比。
+为何二维不应复现三维诱发性图。健康波长≈175 mm；D↓90% 波长≈55 mm；λ=0.2/0.3 近阻滞。
+环路径≈107 mm 上的混合标签由波长–几何决定，而非 3D maze 走廊——差异是维度与几何边界，不是标定失败。
 
 
-对 3D LBM 的诚实距离。二维 FD 省略跨壁结构、真实纤维各向异性与影像 maze 走廊；
-开放复现本身是贡献，但不能冒充三维性能或组织学保真。
+平台期 vs 真折返。完整 CSV 中，VA 格点可有 persist<1000 但 extra≥1；
+反之，平台滞留可 persist≥1000 而 extra=0 → VA_cycle=Non-VA / VA_paper=VA。终点定义必须写进方法学。
 
 
 ## 七、结论
 
-- 开放 2D 修正 MS 单域脚手架可在无 LBM 源码时对齐关键协议要素。
+- 开放 2D 修正 MS 单域协议/基准可在无生产 LBM 求解器时对齐关键协议要素。
 
-- CV=0.703 mm/ms 与 0D APD=256.6 ms 黄金回归提供量级锚定。
+- CV≈0.70 mm/ms 与 0D APD=256.6 ms 黄金回归提供量级锚定。
 
-- 周期必需 VA 准则消除平台/单圈假阳性，并允许 persist<1000 的真再兴奋。
+- 双重 VA 终点使文献 persist 规则与周期硬化规则可并列审计。
 
-- 波长感知环几何恢复混合相图（完整网格 VA 3 / Non-VA 9）。
+- 波长感知环验证几何恢复混合相图（完整网格 VA 3 / Non-VA 9）。
 
-- 工作边界清晰：非 3D LBM、非猪 DOX 数据复现、非临床 ICD 工具；开放可复现是 methods 贡献。
+- 工作边界清晰：非 3D LBM、非猪 DOX 数据复现、非临床 ICD 工具。
 
 
 ## 八、局限与展望
@@ -383,9 +381,9 @@ doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图�
 
 - 合成纤维化 ≠ DOX 猪心肌 ≠ 缺血性 MI（公开 MI 数据亦不能直接当作 DOX）。
 
-- Niederer/openCARP/MonoAlg3D 交叉验证仍为 P2（待补充）；圆盘全表 CSV「待补充」。
+- Niederer/openCARP/MonoAlg3D 交叉验证仍为后续工作；圆盘几何完整定量 CSV 可按需再生。
 
-- 本 Cursor 代理工具目录无浏览器 MCP；ChatGPT 自动粘贴无法完成——文稿与 paste pack 已置于 GitHub 供外部阅读。
+- DOX 表型 1D CV 尚未在本 FD 脚手架上完全匹配文献目标（已在 phenotypes 中注明）。
 
-- 各向异性传导仍为桩实现；英文全文润色与期刊格式锁定「待补充」。
+- 各向异性传导仍为原型实现。
 

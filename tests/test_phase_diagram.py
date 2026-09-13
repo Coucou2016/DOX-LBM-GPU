@@ -28,3 +28,5 @@ def test_phase_diagram_smoke_tiny_grid(tmp_path: Path):
     text = csv.read_text(encoding="utf-8")
     assert "annulus" in text
     assert "label" in text
+    assert "VA_paper" in text
+    assert "VA_cycle" in text

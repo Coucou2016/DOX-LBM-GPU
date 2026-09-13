@@ -4,12 +4,20 @@
   "n_cells": 12,
   "n_va": 3,
   "n_non_va": 9,
-  "elapsed_s": 158.40773660002742,
-  "seconds_per_cell": 13.200644716668952,
+  "n_va_paper": 3,
+  "n_va_cycle": 3,
+  "n_non_va_paper": 9,
+  "n_non_va_cycle": 9,
+  "elapsed_s": 171.63178259995766,
+  "seconds_per_cell": 14.302648549996471,
   "full_grid_expected_s": null,
   "csv": "E:\\Projects\\20260522-DOX-LBM_GPU\\outputs\\phase_diagram.csv",
   "heatmap": "E:\\Projects\\20260522-DOX-LBM_GPU\\outputs\\phase_diagram.png",
   "wavelength_note": "Healthy lambda_wave=175.0 mm vs path=106.8 mm (need CV < 0.43 mm/ms to reenter). Paper disc 24 mm << 175 mm.",
   "tau_close_ms": 150.0,
-  "healthy_cv_band": "0.55-0.85 mm/ms (homogeneous sheet, same D)"
+  "healthy_cv_band": "0.55-0.85 mm/ms (homogeneous sheet, same D)",
+  "endpoints": {
+    "VA_paper": "persist>=1000 ms (Villar-Valero)",
+    "VA_cycle": "extra>=1 or relapped>=3 (default label)"
+  }
 }

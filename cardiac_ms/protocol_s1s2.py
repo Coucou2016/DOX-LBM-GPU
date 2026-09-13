@@ -35,6 +35,11 @@ class Stimulus:
     t_end_ms: float
     region: tuple[slice, slice]
     stim_u: float = STIM_U_PROTOCOL
+    stim_amp: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.stim_amp is None:
+            self.stim_amp = float(self.stim_u)
 
 
 def classify_reentry(
@@ -50,12 +55,13 @@ def classify_reentry(
     """
     Return ``\"VA\"`` or ``\"Non-VA\"``.
 
-    Default ``require_cycle=True``: persist≥1000 ms alone is **not** VA, and
-    a single pass around the ring (each angular probe fires once after S2)
-    is also not VA. Reentry needs a **second** excitation: ≥1 extra probe
-    cycle **or** ≥3 sites with ≥2 post-stimulus upstrokes (``n_probes_relapped``).
+    Default ``require_cycle=True`` (``VA_cycle`` endpoint): persist≥1000 ms alone
+    is **not** VA, and a single pass around the ring is also not VA. Reentry needs
+    a **second** excitation: ≥1 extra probe cycle **or** ≥3 sites with ≥2
+    post-stimulus upstrokes (``n_probes_relapped``).
 
-    Set ``require_cycle=False`` to recover the paper persist≥1000 ms rule.
+    Set ``require_cycle=False`` for the paper persist≥1000 ms rule (``VA_paper``).
+    Prefer ``dual_va_labels`` when both endpoints are needed.
     """
     has_cycle = int(n_extra_cycles) >= int(extra_cycle_min) or int(
         n_probes_relapped
@@ -66,6 +72,42 @@ def classify_reentry(
     if persist_ok or has_cycle:
         return "VA"
     return "Non-VA"
+
+
+def dual_va_labels(
+    activation_persists_ms: float,
+    *,
+    threshold_ms: float = REENTRY_SUSTAIN_MS,
+    n_extra_cycles: int = 0,
+    extra_cycle_min: int = 1,
+    n_probes_activated: int = 0,
+    min_probes_for_circulation: int = 3,
+    n_probes_relapped: int = 0,
+) -> dict[str, str | bool]:
+    """
+    Report both literature and cycle-hardened VA endpoints.
+
+    - ``VA_paper``: Villar-Valero persist ≥ 1000 ms (or cycle evidence).
+    - ``VA_cycle``: require_cycle (extra≥1 or relapped≥3); default scaffold label.
+    """
+    kw = dict(
+        activation_persists_ms=activation_persists_ms,
+        threshold_ms=threshold_ms,
+        n_extra_cycles=n_extra_cycles,
+        extra_cycle_min=extra_cycle_min,
+        n_probes_activated=n_probes_activated,
+        min_probes_for_circulation=min_probes_for_circulation,
+        n_probes_relapped=n_probes_relapped,
+    )
+    label_paper = classify_reentry(**kw, require_cycle=False)
+    label_cycle = classify_reentry(**kw, require_cycle=True)
+    return {
+        "VA_paper": label_paper,
+        "VA_cycle": label_cycle,
+        "label": label_cycle,
+        "va_paper": label_paper == "VA",
+        "va_cycle": label_cycle == "VA",
+    }
 
 
 def build_s1s2_stimuli(
@@ -131,12 +173,14 @@ def run_s1s2(
     stim_u: float = STIM_U_PROTOCOL,
     params: dict[str, float] | None = None,
     diffusion_mode: str = "auto",
+    stimulus_mode: str = "current",
     **kwargs: Any,
 ) -> dict[str, Any]:
     """
     Run S1–S2 on the 2D monodomain and classify VA / Non-VA.
 
-    Extra kwargs go to ``simulate_mono2d`` (e.g. ``tau_close_field``).
+    Default ``stimulus_mode=\"current\"`` (J_stim add during windows). Use
+    ``voltage_clamp`` for legacy regression. Extra kwargs go to ``simulate_mono2d``.
     """
     s1_region = kwargs.pop("s1_region", None)
     s2_region = kwargs.pop("s2_region", None)
@@ -180,6 +224,7 @@ def run_s1s2(
         snapshots=False,
         params=params,
         diffusion_mode=diffusion_mode,
+        stimulus_mode=stimulus_mode,
         **kwargs,
     )
 
@@ -190,18 +235,22 @@ def run_s1s2(
     n_relap = int(meta.get("n_probes_relapped") or 0)
     if not n_relap and extra_up:
         n_relap = int(sum(1 for k in extra_up if int(k) >= 2))
-    label = classify_reentry(
+    dual = dual_va_labels(
         persist,
         threshold_ms=reentry_threshold_ms,
         n_extra_cycles=n_extra,
         n_probes_activated=n_probes,
         n_probes_relapped=n_relap,
-        require_cycle=True,
     )
+    label = str(dual["label"])
     lat_stats = summarize_lat_cv(meta["activation_ms"], dx)
 
     return {
         "label": label,
+        "VA_paper": dual["VA_paper"],
+        "VA_cycle": dual["VA_cycle"],
+        "va_paper": bool(dual["va_paper"]),
+        "va_cycle": bool(dual["va_cycle"]),
         "activation_persists_ms": persist,
         "n_extra_cycles": n_extra,
         "n_probes_activated": n_probes,
@@ -212,6 +261,7 @@ def run_s1s2(
         "last_stim_end_ms": float(meta.get("last_stim_end_ms") or last_stimulus_end_ms(stimuli)),
         "t_end_ms": t_end,
         "reentry_threshold_ms": reentry_threshold_ms,
+        "stimulus_mode": stimulus_mode,
         "u_max": float(meta.get("u_peak") or u.max()),
         "u_final_max": float(u.max()),
         "h_min": float(h.min()),

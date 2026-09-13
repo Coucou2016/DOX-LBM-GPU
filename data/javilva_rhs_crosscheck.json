@@ -1,0 +1,64 @@
+{
+  "note": "Found clone at E:\\Projects\\20260522-DOX-LBM_GPU\\_ext_dox_fibrosis (solver proprietary per their README).",
+  "javilva_default_tau_close": 189.0,
+  "our_default_tau_close": 150.0,
+  "rows": [
+    {
+      "lam": 0.01,
+      "tau_close": 150.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 2.220446049250313e-16,
+      "max_abs_dh": 0.0
+    },
+    {
+      "lam": 0.1,
+      "tau_close": 150.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 1.1102230246251565e-16,
+      "max_abs_dh": 0.0
+    },
+    {
+      "lam": 0.2,
+      "tau_close": 150.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 5.551115123125783e-17,
+      "max_abs_dh": 0.0
+    },
+    {
+      "lam": 0.3,
+      "tau_close": 150.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 5.551115123125783e-17,
+      "max_abs_dh": 0.0
+    },
+    {
+      "lam": 0.01,
+      "tau_close": 189.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 2.220446049250313e-16,
+      "max_abs_dh": 0.0
+    },
+    {
+      "lam": 0.1,
+      "tau_close": 189.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 1.1102230246251565e-16,
+      "max_abs_dh": 0.0
+    },
+    {
+      "lam": 0.2,
+      "tau_close": 189.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 5.551115123125783e-17,
+      "max_abs_dh": 0.0
+    },
+    {
+      "lam": 0.3,
+      "tau_close": 189.0,
+      "backend": "torch_javilva",
+      "max_abs_du": 5.551115123125783e-17,
+      "max_abs_dh": 0.0
+    }
+  ],
+  "all_ok": true
+}

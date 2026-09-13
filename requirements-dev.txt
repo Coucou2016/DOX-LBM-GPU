@@ -1,0 +1,5 @@
+# Development / test extras
+-r requirements.txt
+pytest>=7.0
+SciencePlots>=2.1.0
+matplotlib>=3.7
