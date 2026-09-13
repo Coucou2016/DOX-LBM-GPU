@@ -32,6 +32,11 @@
 
 `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/ -q` → **47 passed**
 
+## Git
+
+- **SHA:** `9613b5166798185c01b1c163b2a4e99bf16246ad`
+- **Push:** 已推送至 `origin/master`（https://github.com/Coucou2016/DOX-LBM-GPU）
+
 ## 未完成 / 后续（P2）
 
 - 各向异性精化；Niederer / openCARP / MonoAlg3D 交叉验证  
