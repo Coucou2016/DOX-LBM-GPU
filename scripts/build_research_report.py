@@ -334,7 +334,7 @@ Villar-Valero 等（STACOM 2024 / <em>J Physiol</em> 2025，doi:10.1113/jp288819
 （<code>javilva/doxorubicin_fibrosis_model</code>），生产求解器仍专有。Chabiniok &amp; Zaha（doi:10.1113/jp290313）呼吁打开方法。</p>
 <p>本仓库提供开放的 <strong>CPU 二维有限差分单域协议/基准</strong>：对齐修正 MS、守恒扩散
 ∇·(D∇u)、合成三相纤维化、S1–S2（extras 240/200/190 ms），标定健康 CV≈<strong>0.70 mm/ms</strong>，
-并报告双重 VA 终点（<code>VA_paper</code> / <code>VA_cycle</code>）。钉扎环为波长设计的<strong>验证几何</strong>（路径≈107 mm）。
+并报告三重 VA 终点（<code>VA_paper</code> / <code>VA_recurrence</code> / <code>VA_strict</code>）。钉扎环为波长设计的<strong>验证几何</strong>（路径≈107 mm）。
 完整 4×3 环相图 <strong>VA 3 / Non-VA 9</strong>。0D APD<sub>90</sub> 黄金回归 <strong>256.6 ms</strong>。
 <strong>不是</strong>三维 DOX 孪生复现，也<strong>不</strong>声称 ICD 临床效用。</p>
 """,
@@ -349,7 +349,7 @@ LBM–GPU 单域；对 λ 与扩散做参数扫描（报道约 96 组），报�
 降低使用门槛，并推进更大规模验证。评述亦指出猪模型 9 周纤维化可能重于典型患者 DOX 毒性——这限制跨物种外推。
 ICD 患者选择的临床效用“尚未确立”。</p>
 <p><strong>本脚手架的定位。</strong>开放<strong>二维协议/基准</strong>（Fibrosis-Reentry-MS2D）：离子律、刺激协议、
-双重 VA 终点（<code>VA_paper</code>/<code>VA_cycle</code>）、波长–几何一致性与扩散算子诚实性。它回答“协议能否在开放 2D 上被压力测试”，
+三重 VA 终点（<code>VA_paper</code>/<code>VA_recurrence</code>/<code>VA_strict</code>）、波长–几何一致性与扩散算子诚实性。它回答“协议能否在开放 2D 上被压力测试”，
 而不是“能否复现猪 LV 的 LBM 定量结果”。</p>
 <p><strong>文献写作架构：</strong>
 (1) Villar-Valero 2025——参数扫描与 VA 终点主叙事；
@@ -380,7 +380,7 @@ ICD 患者选择的临床效用“尚未确立”。</p>
 <p><strong>数值。</strong>显式欧拉 + 面平均 D 的五点守恒扩散（含 Neumann 角点）；CFL：Δt≤Δx²/(4D_max)，另离子上限 0.1 ms。
 诱导脚本默认 <code>stimulus_mode=current</code>（亦可 voltage_clamp）。</p>
 <p><strong>协议。</strong>S1 BCL=400 ms，n=3；extras 默认 240/200/190 ms；诱导窗与观察窗（默认 1000 ms）分离。
-<code>VA_paper</code>：persist≥1000 ms；<code>VA_cycle</code>（默认 label）：需 n_extra_cycles≥1 或 n_probes_relapped≥3。</p>
+<code>VA_paper</code>：persist≥1000 ms <strong>仅此</strong>（从不 OR 周期）；<code>VA_recurrence</code>（默认 label）：需 n_extra_cycles≥1 或 n_probes_relapped≥3；<code>VA_strict</code>：persist≥1000 <strong>且</strong> 再入循环。</p>
 <p><strong>几何。</strong>圆盘阴性对照（直径≈24 mm ≪ 175 mm）vs 钉扎环<strong>验证几何</strong>（路径≈106.8 mm）。
 完整网格：λ×D 共 12 格，nx=ny=64，dx=0.75 mm。</p>
 """,
@@ -389,7 +389,7 @@ ICD 患者选择的临床效用“尚未确立”。</p>
 <li>P0：修复门控 dt、引入 λ-MS、CV 标定、守恒扩散、S1–S2。</li>
 <li>发现小圆盘相图全 Non-VA → 波长审计（175 mm vs 24 mm）。</li>
 <li>改默认钉扎环；发现平台期假阳性 → 周期必需准则 + 单 CI 负对照测试。</li>
-<li>Major Revision：双重 VA 终点、全域扩散测试、javilva RHS 交叉、MIT 打包；完整 4×3 环相图 VA_cycle 3 / Non-VA 9；pytest 47 passed。</li>
+<li>Round-2：三重 VA 终点（paper persist-only / recurrence / strict）；完整 4×3 环相图 VA_paper 1 / VA_recurrence 3 / VA_strict 1；pytest 53 passed。</li>
 <li>SciencePlots 重绘；手稿定位为开放 2D 协议/基准；生成自包含 HTML/MD/PDF 研究报告。</li>
 </ol>
 """,
@@ -403,14 +403,15 @@ ICD 患者选择的临床效用“尚未确立”。</p>
 <p><strong>为何二维不应复现三维诱发性图。</strong>健康波长≈175 mm；D↓90% 波长≈55 mm；λ=0.2/0.3 近阻滞。
 环路径≈107 mm 上的混合标签由波长–几何决定，而非 3D maze 走廊——差异是维度与几何边界，不是标定失败。</p>
 <p><strong>平台期 vs 真折返。</strong>完整 CSV 中，VA 格点可有 persist&lt;1000 但 extra≥1；
-反之，平台滞留可 persist≥1000 而 extra=0 → <code>VA_cycle</code>=Non-VA / <code>VA_paper</code>=VA。终点定义必须写进方法学。</p>
+反之，平台滞留可 persist≥1000 而 extra=0 → <code>VA_recurrence</code>=Non-VA / <code>VA_paper</code>=VA；
+再入而 persist&lt;1000 → <code>VA_recurrence</code>=VA / <code>VA_paper</code>=Non-VA。终点定义必须写进方法学。</p>
 """,
         "conclusions": """
 <ol>
 <li>开放 2D 修正 MS 单域协议/基准可在无生产 LBM 求解器时对齐关键协议要素。</li>
 <li>CV≈0.70 mm/ms 与 0D APD=256.6 ms 黄金回归提供量级锚定。</li>
-<li>双重 VA 终点使文献 persist 规则与周期硬化规则可并列审计。</li>
-<li>波长感知环验证几何恢复混合相图（完整网格 VA 3 / Non-VA 9）。</li>
+<li>三重 VA 终点使文献 persist-only、再入循环与严格合取规则可并列审计。</li>
+<li>波长感知环验证几何恢复混合相图（VA_recurrence 3 / Non-VA 9；VA_paper 1；VA_strict 1）。</li>
 <li>工作边界清晰：非 3D LBM、非猪 DOX 数据复现、非临床 ICD 工具。</li>
 </ol>
 """,

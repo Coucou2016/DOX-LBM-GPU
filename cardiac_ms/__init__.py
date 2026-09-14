@@ -18,6 +18,7 @@ from cardiac_ms.protocol_s1s2 import (
     dual_va_labels,
     run_annulus_s1s2,
     run_s1s2,
+    triple_va_labels,
 )
 from cardiac_ms.tissue_classes import annulus_fibrosis_maps, assign_three_class, disk_fibrosis_three_class
 from cardiac_ms.geometries import wavelength_mm
@@ -44,5 +45,6 @@ __all__ = [
     "simulate_ms_0d",
     "simulate_ms_0d_modified",
     "suggest_dt_cfl",
+    "triple_va_labels",
     "wavelength_mm",
 ]

@@ -111,14 +111,22 @@ def run_cell_annulus(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "d_fib_frac": 1.0 - float(d_red),
         "label": r["label"],
         "VA_paper": r.get("VA_paper", r["label"]),
-        "VA_cycle": r.get("VA_cycle", r["label"]),
+        "VA_recurrence": r.get("VA_recurrence", r.get("VA_cycle", r["label"])),
+        "VA_strict": r.get("VA_strict", "Non-VA"),
+        "VA_cycle": r.get("VA_cycle", r.get("VA_recurrence", r["label"])),
         "va": 1 if r["label"] == "VA" else 0,
         "va_paper": 1 if r.get("va_paper") else 0,
+        "va_recurrence": 1 if r.get("va_recurrence") else 0,
+        "va_strict": 1 if r.get("va_strict") else 0,
         "va_cycle": 1 if r.get("va_cycle") else 0,
         "activation_persists_ms": r["activation_persists_ms"],
         "n_extra_cycles": r["n_extra_cycles"],
         "n_probes_activated": r.get("n_probes_activated", 0),
         "n_probes_relapped": r.get("n_probes_relapped", 0),
+        "n_ordered_laps": r.get("n_ordered_laps", 0),
+        "circulation_direction": r.get("circulation_direction"),
+        "lap_period_ms": r.get("lap_period_ms"),
+        "cv_mm_per_ms": r.get("cv_two_point_mm_per_ms") or r.get("cv_mm_per_ms"),
         "excited_fraction": r.get("excited_fraction", 0.0),
         "u_max": r["u_max"],
         "u_final_max": r["u_final_max"],
@@ -166,14 +174,22 @@ def run_cell_disc(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "d_fib_frac": 1.0 - float(d_red),
         "label": r["label"],
         "VA_paper": r.get("VA_paper", r["label"]),
-        "VA_cycle": r.get("VA_cycle", r["label"]),
+        "VA_recurrence": r.get("VA_recurrence", r.get("VA_cycle", r["label"])),
+        "VA_strict": r.get("VA_strict", "Non-VA"),
+        "VA_cycle": r.get("VA_cycle", r.get("VA_recurrence", r["label"])),
         "va": 1 if r["label"] == "VA" else 0,
         "va_paper": 1 if r.get("va_paper") else 0,
+        "va_recurrence": 1 if r.get("va_recurrence") else 0,
+        "va_strict": 1 if r.get("va_strict") else 0,
         "va_cycle": 1 if r.get("va_cycle") else 0,
         "activation_persists_ms": r["activation_persists_ms"],
         "n_extra_cycles": r["n_extra_cycles"],
         "n_probes_activated": r.get("n_probes_activated", 0),
         "n_probes_relapped": r.get("n_probes_relapped", 0),
+        "n_ordered_laps": r.get("n_ordered_laps", 0),
+        "circulation_direction": r.get("circulation_direction"),
+        "lap_period_ms": r.get("lap_period_ms"),
+        "cv_mm_per_ms": r.get("cv_two_point_mm_per_ms") or r.get("cv_mm_per_ms"),
         "excited_fraction": r.get("excited_fraction", 0.0),
         "u_max": r["u_max"],
         "u_final_max": r.get("u_final_max"),
@@ -276,11 +292,13 @@ def main() -> int:
         rows.append(row)
         print(
             f"[{k}/{n_total}] lam={lam} D↓{100 * d_red:.0f}%  "
-            f"cycle={row.get('VA_cycle', row['label'])} "
-            f"paper={row.get('VA_paper', '?')}  "
+            f"rec={row.get('VA_recurrence', row['label'])} "
+            f"paper={row.get('VA_paper', '?')} "
+            f"strict={row.get('VA_strict', '?')}  "
             f"persist={row['activation_persists_ms']:.1f} ms  extra={row['n_extra_cycles']}  "
             f"probes={row.get('n_probes_activated', 0)}  "
             f"relap={row.get('n_probes_relapped', 0)}  "
+            f"laps={row.get('n_ordered_laps', 0)}  "
             f"({time.perf_counter() - cell_t0:.1f}s)"
         )
 
@@ -299,7 +317,9 @@ def main() -> int:
     n_va = sum(r["va"] for r in rows)
     n_non = n_total - n_va
     n_va_paper = sum(int(r.get("va_paper", 0)) for r in rows)
-    n_va_cycle = sum(int(r.get("va_cycle", 0)) for r in rows)
+    n_va_recurrence = sum(int(r.get("va_recurrence", r.get("va_cycle", 0))) for r in rows)
+    n_va_strict = sum(int(r.get("va_strict", 0)) for r in rows)
+    n_va_cycle = n_va_recurrence  # alias
     full_expected = None
     if n_total and spec["mode"] == "fast" and args.geometry == "annulus":
         full_expected = (elapsed / n_total) * (4 * 3) * (2430.0 / 1220.0)
@@ -313,8 +333,12 @@ def main() -> int:
         "n_va": n_va,
         "n_non_va": n_non,
         "n_va_paper": n_va_paper,
+        "n_va_recurrence": n_va_recurrence,
+        "n_va_strict": n_va_strict,
         "n_va_cycle": n_va_cycle,
         "n_non_va_paper": n_total - n_va_paper,
+        "n_non_va_recurrence": n_total - n_va_recurrence,
+        "n_non_va_strict": n_total - n_va_strict,
         "n_non_va_cycle": n_total - n_va_cycle,
         "elapsed_s": elapsed,
         "seconds_per_cell": elapsed / n_total if n_total else None,
@@ -325,8 +349,9 @@ def main() -> int:
         "tau_close_ms": TAU_CLOSE,
         "healthy_cv_band": "0.55-0.85 mm/ms (homogeneous sheet, same D)",
         "endpoints": {
-            "VA_paper": "persist>=1000 ms (Villar-Valero)",
-            "VA_cycle": "extra>=1 or relapped>=3 (default label)",
+            "VA_paper": "persist>=1000 ms ONLY (Villar-Valero; never OR cycle)",
+            "VA_recurrence": "extra>=1 or relapped>=3 (default label)",
+            "VA_strict": "persist>=1000 AND recurrent circulation",
         },
     }
     (args.out_dir / "phase_diagram_summary.json").write_text(

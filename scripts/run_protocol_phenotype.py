@@ -18,8 +18,10 @@ from cardiac_ms.protocol_s1s2 import run_annulus_s1s2
 
 def run_protocol(name: str, *, stimulus_mode: str = "current") -> dict:
     ph = get_phenotype(name)
+    # CRITICAL: d_reduction=0.0 is valid (CONTROL); never use truthiness on float.
+    d_red = float(ph.get("d_reduction", 0.0))
     r = run_annulus_s1s2(
-        d_reduction=float(ph["d_reduction"]) if ph["d_reduction"] else 0.30,
+        d_reduction=d_red,
         lam_ring=float(ph["params"]["lam"]),
         extra_cis_ms=tuple(ph["extra_cis_ms"]),
         tau_close_ring=float(ph["params"]["tau_close"]),
@@ -30,10 +32,13 @@ def run_protocol(name: str, *, stimulus_mode: str = "current") -> dict:
         "phenotype": ph["name"],
         "label": r["label"],
         "VA_paper": r.get("VA_paper"),
+        "VA_recurrence": r.get("VA_recurrence"),
+        "VA_strict": r.get("VA_strict"),
         "VA_cycle": r.get("VA_cycle"),
         "activation_persists_ms": r["activation_persists_ms"],
         "n_extra_cycles": r["n_extra_cycles"],
         "n_probes_relapped": r.get("n_probes_relapped"),
+        "d_reduction": d_red,
         "extra_cis_ms": list(ph["extra_cis_ms"]),
         "targets": ph["targets"],
         "notes": ph["notes"],

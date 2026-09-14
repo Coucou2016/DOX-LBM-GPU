@@ -29,4 +29,6 @@ def test_phase_diagram_smoke_tiny_grid(tmp_path: Path):
     assert "annulus" in text
     assert "label" in text
     assert "VA_paper" in text
-    assert "VA_cycle" in text
+    assert "VA_recurrence" in text
+    assert "VA_strict" in text
+    assert "VA_cycle" in text  # backward-compat alias column

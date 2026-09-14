@@ -9,9 +9,9 @@ url: "https://github.com/Coucou2016/DOX-LBM-GPU"
 license: MIT
 abstract: >-
   Open CPU 2D finite-difference monodomain protocol/benchmark aligned with
-  λ-modified Mitchell–Schaeffer choices from Villar-Valero et al. (DOX-inspired),
-  not a 3D LBM–GPU digital-twin reproduction. Dual VA endpoints (persist≥1000 ms
-  and cycle-required) and wavelength-aware verification geometry.
+  λ-modified Mitchell–Schaeffer choices from Villar-Valero et al. (DOX-inspired).
+  Triple VA endpoints (persist-only, recurrence, strict) and wavelength-aware
+  verification geometry. Not a 3D LBM–GPU digital-twin reproduction.
 keywords:
   - cardiac electrophysiology
   - Mitchell-Schaeffer
@@ -19,15 +19,23 @@ keywords:
   - fibrosis
   - reentry
   - reproducibility
+# preferred-citation is THIS software (not the Villar-Valero biology paper).
 preferred-citation:
-  type: article
+  type: software
   authors:
-    - family-names: Villar-Valero
-      given-names: Jose M.
-      et-al.: true
-  title: >-
-    In silico predictions of action potential propagation in doxorubicin
-    cardiotoxicity
-  journal: The Journal of Physiology
-  year: 2025
-  doi: 10.1113/jp288819
+    - name: "DOX-LBM-GPU / Fibrosis-Reentry-MS2D contributors"
+  title: "Fibrosis-Reentry-MS2D (DOX-LBM-GPU): wavelength-aware 2D monodomain benchmark"
+  year: 2026
+  url: "https://github.com/Coucou2016/DOX-LBM-GPU"
+references:
+  - type: article
+    authors:
+      - family-names: Villar-Valero
+        given-names: Javier
+        et-al.: true
+    title: >-
+      In silico predictions of action potential propagation in doxorubicin
+      cardiotoxicity
+    journal: The Journal of Physiology
+    year: 2026
+    doi: 10.1113/jp288819

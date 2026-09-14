@@ -71,6 +71,8 @@ class TissueMaps:
     dense_mask: np.ndarray
     border_mask: np.ndarray
     conducting: np.ndarray | None = None
+    # Optional physical geometry bookkeeping (mm); unused by the solver.
+    geometry_mm: dict | None = None
 
     def __post_init__(self) -> None:
         if self.conducting is None:
@@ -149,16 +151,41 @@ def disk_fibrosis_three_class(
     *,
     center: tuple[int, int] | None = None,
     radius: int | None = None,
-    border_width: int = BORDER_WIDTH_2D_DEFAULT,
+    radius_mm: float | None = None,
+    border_width: int | None = None,
+    border_width_mm: float | None = None,
+    dx: float = 0.5,
     **kwargs,
 ) -> TissueMaps:
-    """Circular dense core (paper-like 2D analog of an LGE cluster) plus border."""
+    """
+    Circular dense core (paper-like 2D analog of an LGE cluster) plus border.
+
+    Physical geometry (preferred for manuscripts):
+      ``radius_mm``, ``border_width_mm`` with ``dx`` → integer grid counts.
+    Legacy grid API: ``radius``, ``border_width`` in cells.
+    """
     if center is None:
         center = (nx // 2, ny // 2)
     if radius is None:
-        radius = max(3, nx // 6)
+        if radius_mm is not None:
+            radius = max(1, int(round(float(radius_mm) / float(dx))))
+        else:
+            radius = max(3, nx // 6)
+    if border_width is None:
+        if border_width_mm is not None:
+            border_width = max(0, int(round(float(border_width_mm) / float(dx))))
+        else:
+            border_width = BORDER_WIDTH_2D_DEFAULT
     mask = fibrosis_mask(nx, ny, center=center, radius=radius)
-    return assign_three_class(mask, border_width=border_width, **kwargs)
+    maps = assign_three_class(mask, border_width=border_width, **kwargs)
+    maps.geometry_mm = {
+        "radius_cells": int(radius),
+        "border_width_cells": int(border_width),
+        "radius_mm": float(radius) * float(dx),
+        "border_width_mm": float(border_width) * float(dx),
+        "dx_mm": float(dx),
+    }
+    return maps
 
 
 def ring_obstacle_maps(

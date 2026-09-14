@@ -1,0 +1,109 @@
+{
+  "STIM_VOLTAGE": 0.8,
+  "STIM_CURRENT": 0.8,
+  "amps": [
+    0.05,
+    0.1,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.0
+  ],
+  "scans": {
+    "current": {
+      "rows": [
+        {
+          "stimulus_mode": "current",
+          "amp": 0.05,
+          "u_max": 0.9449658507264181,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "current",
+          "amp": 0.1,
+          "u_max": 0.9449785733124175,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "current",
+          "amp": 0.2,
+          "u_max": 0.945024818742856,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "current",
+          "amp": 0.4,
+          "u_max": 1.0380803152014815,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "current",
+          "amp": 0.6,
+          "u_max": 1.1030115166245724,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "current",
+          "amp": 0.8,
+          "u_max": 1.1426943928514102,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "current",
+          "amp": 1.0,
+          "u_max": 1.1773588030716917,
+          "captured": true
+        }
+      ],
+      "threshold_amp": 0.05
+    },
+    "voltage_clamp": {
+      "rows": [
+        {
+          "stimulus_mode": "voltage_clamp",
+          "amp": 0.05,
+          "u_max": 0.9449873733120439,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "voltage_clamp",
+          "amp": 0.1,
+          "u_max": 0.9449873733120439,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "voltage_clamp",
+          "amp": 0.2,
+          "u_max": 0.9449873733120439,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "voltage_clamp",
+          "amp": 0.4,
+          "u_max": 0.9449873733120439,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "voltage_clamp",
+          "amp": 0.6,
+          "u_max": 0.9449873733120439,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "voltage_clamp",
+          "amp": 0.8,
+          "u_max": 0.9449873733120439,
+          "captured": true
+        },
+        {
+          "stimulus_mode": "voltage_clamp",
+          "amp": 1.0,
+          "u_max": 0.9449873733120439,
+          "captured": true
+        }
+      ],
+      "threshold_amp": 0.05
+    }
+  }
+}

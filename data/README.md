@@ -51,8 +51,9 @@ python scripts/generate_synthetic_data.py
 
 ### 4. MonoAlg3D
 
-- 本仓库已有源码树 `MonoAlg3D_C-master/`（C++/CUDA）。
-- Windows GTX 950M + 混杂 CUDA 9.2/11.x：**不要**作为默认构建路径。见其 `guide-monoalg3d-windows.md`；优先 WSL2 + 匹配的 nvcc。
+- 外部求解器指针：<https://github.com/>（搜索 MonoAlg3D）或本地另置的 CUDA 树。
+- **公开 clone 不捆绑** `MonoAlg3D_C-master/` 源码树。
+- Windows GTX 950M + 混杂 CUDA：**不要**作为默认构建路径；优先 WSL2 + 匹配的 nvcc。
 
 ### 5. 论文原始 DOX 猪数据
 

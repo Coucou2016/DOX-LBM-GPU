@@ -2,13 +2,15 @@
 """
 Calibrate CONTROL / DOX1 / DOX2 0D APD (tau_close) and homogeneous 2D CV (D).
 
-Literature anchors (Villar-Valero J Physiol 2025, healthy tissue):
-  APD: 309 / 269 / 210 ms
-  CV:  71 / 41 / 43.89 cm/s  (= 0.71 / 0.41 / 0.44 mm/ms)
+Literature anchors (Villar-Valero J Physiol 2026, healthy tissue):
+  APD: 309 / 269 / 210 ms  (DOX shorter than CONTROL)
+  fibrosis APD: DOX1 276 / DOX2 184 ms
+  CV:  71 / 41 / 43.89 cm/s  (= 0.71 / 0.41 / 0.4389 mm/ms)
 
 Writes data/phenotype_calibration.json. Sets cv_matched / apd_matched_0d only
 when measured values fall within ±10%; otherwise keeps False and records residual.
-Does not invent twin fidelity.
+Does not invent twin fidelity. Optionally ``--apply`` updates PHENOTYPES seeds
+in cardiac_ms/phenotypes.py (printed as patch advice; JSON always written).
 """
 
 from __future__ import annotations
@@ -261,8 +263,12 @@ def main() -> int:
 
     report = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
-        "source": "Villar-Valero J Physiol 2025 healthy-tissue APD/CV anchors",
+        "source": "Villar-Valero J Physiol 2026 healthy/fibrosis APD and CV anchors",
         "acceptance": "±10% for apd_matched_0d / cv_matched; CFL must be stable",
+        "note": (
+            "Literature targets are data-only (CONTROL_target / DOX1_target / DOX2_target). "
+            "Calibrated tau_close/D/lam are model parameters, not literature constants."
+        ),
         "phenotypes": rows,
         "all_apd_matched": all(r["apd_matched_0d"] for r in rows),
         "all_cv_matched": all(r["cv_matched"] for r in rows),

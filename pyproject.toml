@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cardiac-ms"
+version = "0.2.0"
+description = "Fibrosis-Reentry-MS2D: wavelength-aware 2D monodomain protocol/benchmark"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "DOX-LBM-GPU / Fibrosis-Reentry-MS2D contributors" }]
+dependencies = [
+  "numpy>=1.22",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+  "matplotlib>=3.5",
+]
+plot = [
+  "matplotlib>=3.5",
+  "SciencePlots>=2.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["cardiac_ms*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

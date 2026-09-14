@@ -40,7 +40,9 @@
 
 实现见 `suggest_dt_cfl` / `check_cfl`；`simulate_mono2d` 在 `enforce_cfl=True` 时自动钳制 `dt`。标定后 D≈0.0465 mm²/ms、dx=0.5 mm 时，dt=0.1 ms 的 CFL 数约 0.07，远低于 0.5。
 
-离子项与扩散 **算子分裂**（同一步显式欧拉）。扩散 CFL 在小 D 下会允许 dt≫τ_in；实现将自动 dt 上限设为 **0.1 ms**（`IONIC_DT_MAX_MS`），以免上升沿失真。
+离子项与扩散在同一步内做 **加性显式欧拉**（additive forward Euler）：
+`u ← u + dt * (diff_u + rhs + J_stim)`，**不是**算子分裂（operator splitting）。
+扩散 CFL 在小 D 下会允许 dt≫τ_in；实现将自动 dt 上限设为 **0.1 ms**（`IONIC_DT_MAX_MS`），以免上升沿失真。
 
 ## 0D 模型
 
@@ -69,7 +71,7 @@
 
 - S1：BCL 400 ms，默认 3 个（测试可用 n_s1=1 以缩短时间）。
 - S2 及后续 extra：耦合间期相对前一心搏（论文 DOX1：240 / 200 / 190 ms）。
-- **双重终点**：`VA_paper` = persist≥1000 ms **或** 周期证据（Villar-Valero 风格）；`VA_cycle`（默认 `label`）要求再兴奋：extra≥1 **或** `n_probes_relapped`≥3。仅 persist≥1000 ms **不算** `VA_cycle`；单圈各探针一次升支也不算。
+- **三重终点**：`VA_paper` = persist≥1000 ms **仅此一条**（Villar-Valero；**从不** OR 周期证据）；`VA_recurrence`（默认 `label` / 兼容别名 `VA_cycle`）要求再兴奋：extra≥1 **或** `n_probes_relapped`≥3；`VA_strict` = persist≥1000 **且** 再入循环。仅 persist≥1000 ms **不算** recurrence；单圈各探针一次升支也不算。
 - 钉扎环是按波长设计的**验证几何**，不是生物学发现；二维相图**不应**复现三维诱发性比例（见手稿 Discussion §5.1）。
 - 刺激：默认 **电流注入** `stimulus_mode="current"`；可选 `"voltage_clamp"`（遗留短回归）。
 - **负对照**：无纤维化均匀组织在默认协议下应为 Non-VA。
@@ -112,7 +114,9 @@
 
 ## 表型标定（CONTROL / DOX1 / DOX2）
 
-Villar-Valero 健康组织锚点：APD 309 / 269 / 210 ms；CV 71 / 41 / ≈44 cm/s。本仓库用 `tau_close` 标定 0D APD、用均匀片 `D` 标定 CV；`cv_matched` 仅在测量值落在目标 ±10% 且 CFL 稳定时为 True，否则保持 False 并在 `data/phenotype_calibration.json` 记录残差——**不**伪造 matched。
+Villar-Valero 健康组织锚点（*J Physiol* 2026）：APD CONTROL 309 / DOX1 269 / DOX2 210 ms（DOX **短于** CONTROL）；纤维化区 APD DOX1 276 / DOX2 184 ms；CV 0.71 / 0.41 / 0.4389 mm/ms。文献目标为数据字典（`CONTROL_target` / `DOX1_target` / `DOX2_target`）；`tau_close`/`D`/`lam` 为标定后的模型参数。`cv_matched` 仅在测量值落在目标 ±10% 且 CFL 稳定时为 True，否则保持 False 并在 `data/phenotype_calibration.json` 记录残差——**不**伪造 matched。
+
+协议：CONTROL **无**异位 extras；DOX1 主协议 240/200/190；DOX2 主协议四个 250 ms 耦合（250×4）。过渡区协议另议，不发明 260/220/200/180。
 
 ## dx / dt 收敛
 

@@ -1,10 +1,12 @@
 """Standard S1–S2 pacing and paper reentry classifier.
 
-Paper protocol (Villar-Valero J Physiol 2025):
+Paper protocol (Villar-Valero J Physiol 2026):
     S1 train: BCL = 400 ms, n_s1 = 3
-    Extra-stimuli: shorter coupling intervals (e.g. 180–320 ms scan)
-    Reentry (VA): sustained activation ≥ 1000 ms after the last stimulus,
-    or ≥ 1 full extra cycle at a probe after the captured last beat.
+    Extra-stimuli: shorter coupling intervals (phenotype-specific)
+    Triple VA endpoints (see ``triple_va_labels``):
+      VA_paper      — persist ≥ 1000 ms ONLY (never OR cycle)
+      VA_recurrence — confirmed extra cycle / ordered circulation
+      VA_strict     — persist ≥ 1000 AND recurrent circulation
 
 Negative control: no fibrosis → Non-VA under the default protocol.
 """
@@ -22,8 +24,9 @@ from cardiac_ms.constants import (
     LAMBDA_HEALTHY,
     N_S1_DEFAULT,
     REENTRY_SUSTAIN_MS,
+    STIM_CURRENT,
     STIM_DURATION_MS,
-    STIM_U_PROTOCOL,
+    STIM_VOLTAGE,
 )
 from cardiac_ms.metrics import summarize_lat_cv
 from cardiac_ms.ms_2d import simulate_mono2d
@@ -35,12 +38,25 @@ class Stimulus:
     t_start_ms: float
     t_end_ms: float
     region: tuple[slice, slice]
-    stim_u: float = STIM_U_PROTOCOL
+    stim_u: float = STIM_VOLTAGE
     stim_amp: float | None = None
 
     def __post_init__(self) -> None:
         if self.stim_amp is None:
-            self.stim_amp = float(self.stim_u)
+            self.stim_amp = float(STIM_CURRENT if self.stim_u == STIM_VOLTAGE else self.stim_u)
+
+
+def has_recurrent_circulation(
+    n_extra_cycles: int = 0,
+    *,
+    extra_cycle_min: int = 1,
+    n_probes_relapped: int = 0,
+    min_probes_for_circulation: int = 3,
+) -> bool:
+    """True if probe evidence shows a second excitation (not a single pass)."""
+    return int(n_extra_cycles) >= int(extra_cycle_min) or int(
+        n_probes_relapped
+    ) >= int(min_probes_for_circulation)
 
 
 def classify_reentry(
@@ -52,27 +68,95 @@ def classify_reentry(
     min_probes_for_circulation: int = 3,
     n_probes_relapped: int = 0,
     require_cycle: bool = True,
+    *,
+    mode: str | None = None,
+    n_ordered_laps: int | None = None,
+    min_ordered_laps_strict: int = 1,
 ) -> str:
     """
     Return ``\"VA\"`` or ``\"Non-VA\"``.
 
-    Default ``require_cycle=True`` (``VA_cycle`` endpoint): persist≥1000 ms alone
-    is **not** VA, and a single pass around the ring is also not VA. Reentry needs
-    a **second** excitation: ≥1 extra probe cycle **or** ≥3 sites with ≥2
-    post-stimulus upstrokes (``n_probes_relapped``).
+    Modes (prefer ``triple_va_labels`` for all three endpoints):
 
-    Set ``require_cycle=False`` for the paper persist≥1000 ms rule (``VA_paper``).
-    Prefer ``dual_va_labels`` when both endpoints are needed.
+    - ``require_cycle=True`` / ``mode=\"recurrence\"`` (``VA_recurrence``):
+      persist alone is **not** VA; need ≥1 extra probe cycle **or** ≥3 sites
+      with ≥2 post-stimulus upstrokes (``n_probes_relapped``).
+      A single ordered lap is **not** recurrence.
+    - ``require_cycle=False`` / ``mode=\"paper\"`` (``VA_paper``):
+      persist ≥ threshold **only** — never OR cycle evidence.
+    - ``mode=\"strict\"`` (``VA_strict``): persist ≥ threshold **and** recurrence;
+      when ``n_ordered_laps`` is provided, also require ≥``min_ordered_laps_strict``
+      ordered laps (default 1 = conjunction only; set 2 for ordered hardening).
     """
-    has_cycle = int(n_extra_cycles) >= int(extra_cycle_min) or int(
-        n_probes_relapped
-    ) >= int(min_probes_for_circulation)
+    _ = n_probes_activated
+    has_cycle = has_recurrent_circulation(
+        n_extra_cycles,
+        extra_cycle_min=extra_cycle_min,
+        n_probes_relapped=n_probes_relapped,
+        min_probes_for_circulation=min_probes_for_circulation,
+    )
     persist_ok = float(activation_persists_ms) >= float(threshold_ms)
-    if require_cycle:
-        return "VA" if has_cycle else "Non-VA"
-    if persist_ok or has_cycle:
-        return "VA"
-    return "Non-VA"
+    if mode is None:
+        mode = "recurrence" if require_cycle else "paper"
+    mode = str(mode).lower().strip()
+    if mode in ("paper", "va_paper", "persist"):
+        return "VA" if persist_ok else "Non-VA"
+    if mode in ("strict", "va_strict"):
+        laps_ok = True
+        if n_ordered_laps is not None:
+            laps_ok = int(n_ordered_laps) >= int(min_ordered_laps_strict)
+        return "VA" if (persist_ok and has_cycle and laps_ok) else "Non-VA"
+    # recurrence / VA_cycle alias
+    return "VA" if has_cycle else "Non-VA"
+
+
+def triple_va_labels(
+    activation_persists_ms: float,
+    *,
+    threshold_ms: float = REENTRY_SUSTAIN_MS,
+    n_extra_cycles: int = 0,
+    extra_cycle_min: int = 1,
+    n_probes_activated: int = 0,
+    min_probes_for_circulation: int = 3,
+    n_probes_relapped: int = 0,
+    n_ordered_laps: int | None = None,
+    min_ordered_laps_strict: int = 1,
+) -> dict[str, str | bool]:
+    """
+    Report three VA endpoints (Round-2 major revision).
+
+    - ``VA_paper``: persist ≥ 1000 ms ONLY (Villar-Valero); never OR cycle.
+    - ``VA_recurrence``: confirmed extra cycle (extra≥1 or relapped≥3).
+    - ``VA_strict``: persist ≥ 1000 **and** recurrence.
+      Optional ordered-lap hardening via ``n_ordered_laps`` / ``min_ordered_laps_strict``.
+
+    ``label`` / ``VA_cycle`` alias ``VA_recurrence`` for scaffold default.
+    """
+    kw = dict(
+        activation_persists_ms=activation_persists_ms,
+        threshold_ms=threshold_ms,
+        n_extra_cycles=n_extra_cycles,
+        extra_cycle_min=extra_cycle_min,
+        n_probes_activated=n_probes_activated,
+        min_probes_for_circulation=min_probes_for_circulation,
+        n_probes_relapped=n_probes_relapped,
+        n_ordered_laps=n_ordered_laps,
+        min_ordered_laps_strict=min_ordered_laps_strict,
+    )
+    label_paper = classify_reentry(**kw, mode="paper")
+    label_rec = classify_reentry(**kw, mode="recurrence")
+    label_strict = classify_reentry(**kw, mode="strict")
+    return {
+        "VA_paper": label_paper,
+        "VA_recurrence": label_rec,
+        "VA_strict": label_strict,
+        "VA_cycle": label_rec,  # backward-compat alias
+        "label": label_rec,
+        "va_paper": label_paper == "VA",
+        "va_recurrence": label_rec == "VA",
+        "va_strict": label_strict == "VA",
+        "va_cycle": label_rec == "VA",
+    }
 
 
 def dual_va_labels(
@@ -84,31 +168,21 @@ def dual_va_labels(
     n_probes_activated: int = 0,
     min_probes_for_circulation: int = 3,
     n_probes_relapped: int = 0,
+    n_ordered_laps: int | None = None,
+    min_ordered_laps_strict: int = 1,
 ) -> dict[str, str | bool]:
-    """
-    Report both literature and cycle-hardened VA endpoints.
-
-    - ``VA_paper``: persist ≥ 1000 ms **or** cycle evidence (Villar-Valero-style).
-    - ``VA_cycle``: require_cycle (extra≥1 or relapped≥3); default scaffold label.
-    """
-    kw = dict(
-        activation_persists_ms=activation_persists_ms,
+    """Deprecated name: returns ``triple_va_labels`` (includes VA_strict)."""
+    return triple_va_labels(
+        activation_persists_ms,
         threshold_ms=threshold_ms,
         n_extra_cycles=n_extra_cycles,
         extra_cycle_min=extra_cycle_min,
         n_probes_activated=n_probes_activated,
         min_probes_for_circulation=min_probes_for_circulation,
         n_probes_relapped=n_probes_relapped,
+        n_ordered_laps=n_ordered_laps,
+        min_ordered_laps_strict=min_ordered_laps_strict,
     )
-    label_paper = classify_reentry(**kw, require_cycle=False)
-    label_cycle = classify_reentry(**kw, require_cycle=True)
-    return {
-        "VA_paper": label_paper,
-        "VA_cycle": label_cycle,
-        "label": label_cycle,
-        "va_paper": label_paper == "VA",
-        "va_cycle": label_cycle == "VA",
-    }
 
 
 def build_s1s2_stimuli(
@@ -119,28 +193,37 @@ def build_s1s2_stimuli(
     n_s1: int = N_S1_DEFAULT,
     extra_cis_ms: Sequence[float] = (240.0,),
     stim_duration_ms: float = STIM_DURATION_MS,
-    stim_u: float = STIM_U_PROTOCOL,
+    stim_u: float = STIM_VOLTAGE,
+    stim_amp: float | None = None,
     s1_region: tuple[slice, slice] | None = None,
     s2_region: tuple[slice, slice] | None = None,
 ) -> list[Stimulus]:
     """
     S1 at 0, BCL, 2*BCL, … then extras whose coupling is relative to the
-    previous beat (paper: S2=240, S3=200, S4=190 ms).
+    previous beat (DOX1: S2=240, S3=200, S4=190 ms). Empty ``extra_cis_ms``
+    yields S1-only (CONTROL: no ectopic extras).
     """
     if s1_region is None:
         s1_region = (slice(0, max(2, ny // 6)), slice(0, max(3, nx // 5)))
     if s2_region is None:
         s2_region = s1_region
+    amp = float(STIM_CURRENT if stim_amp is None else stim_amp)
 
     stimuli: list[Stimulus] = []
     t = 0.0
     for _ in range(int(n_s1)):
-        stimuli.append(Stimulus(t, t + stim_duration_ms, s1_region, stim_u))
+        stimuli.append(
+            Stimulus(t, t + stim_duration_ms, s1_region, stim_u=stim_u, stim_amp=amp)
+        )
         t += bcl_ms
-    t_beat = (int(n_s1) - 1) * bcl_ms
+    t_beat = (int(n_s1) - 1) * bcl_ms if int(n_s1) > 0 else 0.0
     for ci in extra_cis_ms:
         t_beat = t_beat + float(ci)
-        stimuli.append(Stimulus(t_beat, t_beat + stim_duration_ms, s2_region, stim_u))
+        stimuli.append(
+            Stimulus(
+                t_beat, t_beat + stim_duration_ms, s2_region, stim_u=stim_u, stim_amp=amp
+            )
+        )
     return stimuli
 
 
@@ -171,22 +254,28 @@ def run_s1s2(
     D_field: np.ndarray | None = None,
     lam=None,
     s2_cross_field: bool = False,
-    stim_u: float = STIM_U_PROTOCOL,
+    stim_u: float = STIM_VOLTAGE,
+    stim_amp: float | None = None,
     params: dict[str, float] | None = None,
     diffusion_mode: str = "auto",
     stimulus_mode: str = "current",
     detect_singularities: bool = True,
+    min_ordered_laps_strict: int = 1,
     **kwargs: Any,
 ) -> dict[str, Any]:
     """
     Run S1–S2 on the 2D monodomain and classify VA / Non-VA.
 
-    Default ``stimulus_mode=\"current\"`` (J_stim add during windows). Use
-    ``voltage_clamp`` for legacy regression. Extra kwargs go to ``simulate_mono2d``.
+    Default ``stimulus_mode=\"current\"`` (J_stim = ``STIM_CURRENT`` during windows).
+    Use ``voltage_clamp`` (``STIM_VOLTAGE``) for legacy regression.
+    Extra kwargs go to ``simulate_mono2d``.
 
     When ``detect_singularities=True`` (default), appends auxiliary 2D tip metrics
     ``n_singularities`` / ``rotor_detected`` from the final (u, h) snapshot
     (not 3D filament tracking; see ``docs/ASSUMPTIONS.md``).
+
+    ``min_ordered_laps_strict``: if >1, ``VA_strict`` additionally requires that
+    many ordered angular laps (optional hardening; default 1 = P0 conjunction only).
     """
     s1_region = kwargs.pop("s1_region", None)
     s2_region = kwargs.pop("s2_region", None)
@@ -205,6 +294,7 @@ def run_s1s2(
         n_s1=n_s1,
         extra_cis_ms=extra_cis_ms,
         stim_u=stim_u,
+        stim_amp=stim_amp,
         s1_region=s1_region,
         s2_region=s2_region,
     )
@@ -241,12 +331,18 @@ def run_s1s2(
     n_relap = int(meta.get("n_probes_relapped") or 0)
     if not n_relap and extra_up:
         n_relap = int(sum(1 for k in extra_up if int(k) >= 2))
-    dual = dual_va_labels(
+    n_ordered = int(meta.get("n_ordered_laps") or meta.get("n_rotations_est") or 0)
+    circ = meta.get("circulation") or {}
+    dual = triple_va_labels(
         persist,
         threshold_ms=reentry_threshold_ms,
         n_extra_cycles=n_extra,
         n_probes_activated=n_probes,
         n_probes_relapped=n_relap,
+        n_ordered_laps=(
+            n_ordered if (int(min_ordered_laps_strict) > 1 and n_ordered > 0) else None
+        ),
+        min_ordered_laps_strict=min_ordered_laps_strict,
     )
     label = str(dual["label"])
     lat_stats = summarize_lat_cv(meta["activation_ms"], dx)
@@ -265,13 +361,20 @@ def run_s1s2(
     return {
         "label": label,
         "VA_paper": dual["VA_paper"],
+        "VA_recurrence": dual["VA_recurrence"],
+        "VA_strict": dual["VA_strict"],
         "VA_cycle": dual["VA_cycle"],
         "va_paper": bool(dual["va_paper"]),
+        "va_recurrence": bool(dual["va_recurrence"]),
+        "va_strict": bool(dual["va_strict"]),
         "va_cycle": bool(dual["va_cycle"]),
         "activation_persists_ms": persist,
         "n_extra_cycles": n_extra,
         "n_probes_activated": n_probes,
         "n_probes_relapped": n_relap,
+        "n_ordered_laps": n_ordered,
+        "circulation_direction": circ.get("direction"),
+        "lap_period_ms": circ.get("lap_period_ms"),
         "extra_upstrokes": list(extra_up),
         "n_upstrokes_post_stim": int(meta.get("n_upstrokes_post_stim") or 0),
         "excited_fraction": float(meta.get("excited_fraction") or 0.0),

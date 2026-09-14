@@ -3,7 +3,7 @@
 **Also known as:** DOX-LBM-GPU (GitHub repository name unchanged)  
 **Public repo:** https://github.com/Coucou2016/DOX-LBM-GPU
 
-Open **2D monodomain protocol / benchmark** for wavelength-aware fibrosis–reentry studies, inspired by Villar-Valero et al. (STACOM 2024 / *J Physiol* 2025) doxorubicin (DOX) fibrosis work. This is a **protocol-aligned verification scaffold**, not a 3D LBM–GPU reproduction and **not** a DOX digital twin.
+Open **2D monodomain protocol / benchmark** for wavelength-aware fibrosis–reentry studies, inspired by Villar-Valero et al. (STACOM 2024 / *J Physiol* 2026) doxorubicin (DOX) fibrosis work. This is a **protocol-aligned verification scaffold**, not a 3D LBM–GPU reproduction and **not** a DOX digital twin.
 
 > **Credibility bound:** CPU **2D finite-difference monodomain** ≠ 3D LBM; synthetic fibrosis ≠ porcine DOX myocardium ≠ ischemic MI. Quantitative goals are equation/protocol alignment, CV order of magnitude, and auditable VA endpoints.
 
@@ -13,7 +13,7 @@ Open **2D monodomain protocol / benchmark** for wavelength-aware fibrosis–reen
 |-------|--------|
 | Cell model / parameters / sample anatomy | Public — see [`javilva/doxorubicin_fibrosis_model`](https://github.com/javilva/doxorubicin_fibrosis_model) |
 | Production 3D LBM–GPU twin solver | Proprietary (not released as source) |
-| This repo | Open 2D FD monodomain + S1–S2 + dual VA endpoints |
+| This repo | Open 2D FD monodomain + S1–S2 + triple VA endpoints |
 
 ## Quick start
 
@@ -54,18 +54,23 @@ Outputs go to `outputs/` (gitignored).
 | Diffusion | Conservative `div(D∇u)` | Monodomain (LBM in twin) |
 | Healthy CV | Two-point ≈**0.70 mm/ms** (D=0.0465 mm²/ms) | Fiber ≈0.7 m/s |
 | S1 | BCL=400 ms, n=3 | Same |
-| **VA_paper** | Persist ≥ 1000 ms **or** cycle evidence | Villar-Valero-style |
-| **VA_cycle** (default `label`) | extra≥1 **or** `n_probes_relapped`≥3 | Hardened endpoint |
+| **VA_paper** | Persist ≥ 1000 ms **ONLY** (never OR cycle) | Villar-Valero |
+| **VA_recurrence** (default `label`) | extra≥1 **or** `n_probes_relapped`≥3 | Cycle / ordered circulation |
+| **VA_strict** | Persist ≥ 1000 **and** recurrent circulation | Conjunction endpoint |
 | Geometry | Wavelength-designed **pinned annulus** (verification), disc = negative control | 3D LV (not reproduced) |
+| CONTROL extras | **None** (S1 only) | Healthy baseline |
+| DOX1 extras | 240 / 200 / 190 ms | Main protocol |
+| DOX2 extras | 250 / 250 / 250 / 250 ms | Main protocol |
 
-## Dual VA endpoints
+## Triple VA endpoints
 
-Every S1–S2 / phase-diagram cell reports both:
+Every S1–S2 / phase-diagram cell reports three labels:
 
-- `VA_paper` — persist ≥ 1000 ms **or** cycle evidence (Villar-Valero-style)  
-- `VA_cycle` — cycle-required (default classification / `label`)
+- `VA_paper` — persist ≥ 1000 ms **only** (Villar-Valero; never OR cycle)
+- `VA_recurrence` — confirmed extra cycle / ordered circulation (default `label`; alias `VA_cycle`)
+- `VA_strict` — persist ≥ 1000 **and** recurrent circulation
 
-CSV columns include `VA_paper`, `VA_cycle`, `va_paper`, `va_cycle`.
+CSV columns include `VA_paper`, `VA_recurrence`, `VA_strict` (plus `VA_cycle` alias).
 
 ## Reproduce checks
 
@@ -86,8 +91,10 @@ python scripts/run_protocol_phenotype.py DOX1
 | Path | Role |
 |------|------|
 | `cardiac_ms/` | λ-MS, 2D monodomain, geometries, tissue, protocol, metrics |
-| `cardiac_ms/phenotypes.py` | CONTROL / DOX1 / DOX2 literature-target presets |
-| `scripts/run_phase_diagram.py` | Inducibility CSV + heatmap (dual endpoints) |
+| `cardiac_ms/phenotypes.py` | Literature TARGETS vs calibrated model params (CONTROL/DOX1/DOX2) |
+| `scripts/run_phase_diagram.py` | Inducibility CSV + heatmap (triple endpoints) |
+| `scripts/calibrate_phenotypes.py` | 0D APD / homogeneous CV fit → `data/phenotype_calibration.json` |
+| `scripts/scan_capture_threshold.py` | Optional STIM_CURRENT / STIM_VOLTAGE capture scan |
 | `scripts/run_dx_convergence.py` | Minimal dx CV report |
 | `data/README.md` | Zenodo / openCARP / MonoAlg3D pointers |
 | `docs/ASSUMPTIONS.md` | Units, CFL, wavelength limits |
@@ -113,6 +120,8 @@ python scripts/run_protocol_phenotype.py DOX1
 
 See `CITATION.cff`. Primary scientific target:
 
-- Villar-Valero et al., *J Physiol* 2025 (doi:10.1113/jp288819); STACOM 2024  
+- Villar-Valero et al., *J Physiol* 2026 (doi:10.1113/jp288819); STACOM 2024  
 - Djabella, Landau & Sorine (2007); Mitchell & Schaeffer (2003)  
 - Public cell-model reference: `javilva/doxorubicin_fibrosis_model`
+
+Cite **this software** via `CITATION.cff` preferred-citation (not the biology paper as the software citation).

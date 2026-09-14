@@ -1,6 +1,6 @@
 # DOX 纤维化折返协议的开放二维单域脚手架：学术研究报告
 
-生成日期：2026-09-13 · 仓库：DOX-LBM_GPU · 性质：方法与验证研究报告（非临床决策工具）
+生成日期：2026-09-14 · 仓库：Fibrosis-Reentry-MS2D (DOX-LBM-GPU) · 性质：2D 协议/基准研究报告（非临床决策工具）
 
 对照：Villar-Valero et al., J Physiol 2025 (doi:10.1113/jp288819)；Chabiniok & Zaha (doi:10.1113/jp290313)。
 相图摘要：VA=3 / Non-VA=9。
@@ -18,19 +18,16 @@
 
 ## 一、摘要
 
-阿霉素（DOX，doxorubicin，蒽环类化疗药）相关弥漫纤维化可构成室性心律失常（VA，ventricular arrhythmia）基质。
+阿霉素（DOX，doxorubicin）相关弥漫纤维化可构成室性心律失常（VA）基质。
 Villar-Valero 等（STACOM 2024 / J Physiol 2025，doi:10.1113/jp288819）用 MRI 个性化三维左室、
-修正 Mitchell–Schaeffer（MS，含兴奋性参数 λ）与 GPU 格子 Boltzmann（LBM，Lattice–Boltzmann Method）单域求解器，
-在纤维化兴奋性与传导参数空间扫描诱发性。Chabiniok & Zaha（doi:10.1113/jp290313）评述强调：数字孪生要走向临床，
-需“打开方法”（可复现、可本地运行、可让临床科学家参与）。maze-like 基质评述见 doi:10.1113/jp290582。
+修正 Mitchell–Schaeffer（含 λ）与 GPU LBM 单域求解器扫描诱发性。细胞模型/参数/样例解剖公开
+（javilva/doxorubicin_fibrosis_model），生产求解器仍专有。Chabiniok & Zaha（doi:10.1113/jp290313）呼吁打开方法。
 
 
-当该 LBM–GPU 源码不可用时，本仓库提供开放的 CPU 二维有限差分单域脚手架：对齐修正 MS、守恒扩散
-∇·(D∇u)、合成三相纤维化、S1–S2（extras 240/200/190 ms），标定健康 CV=0.703 mm/ms
-（目标 0.70；带 0.55–0.85），并引入要求再兴奋周期的 VA 分类，以避免平台期 / 单圈假阳性。
-因健康波长≈175 mm 远大于小圆盘≈24 mm，默认采用钉扎环（路径≈107 mm）。
-完整 4×3 环相图得到 VA 3 / Non-VA 9（快扫子集曾为 1/3；两格 VA 的 persist<1000 ms）。
-0D APD90 黄金回归 256.6 ms。本报告汇总证据链、图件与局限；
+本仓库提供开放的 CPU 二维有限差分单域协议/基准：对齐修正 MS、守恒扩散
+∇·(D∇u)、合成三相纤维化、S1–S2（extras 240/200/190 ms），标定健康 CV≈0.70 mm/ms，
+并报告三重 VA 终点（VA_paper / VA_recurrence / VA_strict）。钉扎环为波长设计的验证几何（路径≈107 mm）。
+完整 4×3 环相图 VA 3 / Non-VA 9。0D APD90 黄金回归 256.6 ms。
 不是三维 DOX 孪生复现，也不声称 ICD 临床效用。
 
 
@@ -54,7 +51,7 @@ ICD 患者选择的临床效用“尚未确立”。
 
 
 本脚手架的定位。开放二维协议/基准（Fibrosis-Reentry-MS2D）：离子律、刺激协议、
-双重 VA 终点（VA_paper/VA_cycle）、波长–几何一致性与扩散算子诚实性。它回答“协议能否在开放 2D 上被压力测试”，
+三重 VA 终点（VA_paper/VA_recurrence/VA_strict）、波长–几何一致性与扩散算子诚实性。它回答“协议能否在开放 2D 上被压力测试”，
 而不是“能否复现猪 LV 的 LBM 定量结果”。
 
 
@@ -99,7 +96,7 @@ github.com/Coucou2016/DOX-LBM-GPU（展示名 Fibrosis-Reentry-MS2D）。
 
 
 协议。S1 BCL=400 ms，n=3；extras 默认 240/200/190 ms；诱导窗与观察窗（默认 1000 ms）分离。
-VA_paper：persist≥1000 ms；VA_cycle（默认 label）：需 n_extra_cycles≥1 或 n_probes_relapped≥3。
+VA_paper：persist≥1000 ms 仅此（从不 OR 周期）；VA_recurrence（默认 label）：需 n_extra_cycles≥1 或 n_probes_relapped≥3；VA_strict：persist≥1000 且 再入循环。
 
 
 几何。圆盘阴性对照（直径≈24 mm ≪ 175 mm）vs 钉扎环验证几何（路径≈106.8 mm）。
@@ -114,7 +111,7 @@ VA_paper：persist≥1000 ms；VA_cycle（默认 label）：需 n_extra_cycles�
 
 - 改默认钉扎环；发现平台期假阳性 → 周期必需准则 + 单 CI 负对照测试。
 
-- Major Revision：双重 VA 终点、全域扩散测试、javilva RHS 交叉、MIT 打包；完整 4×3 环相图 VA_cycle 3 / Non-VA 9；pytest 47 passed。
+- Round-2：三重 VA 终点（paper persist-only / recurrence / strict）；完整 4×3 环相图 VA_paper 1 / VA_recurrence 3 / VA_strict 1；pytest 53 passed。
 
 - SciencePlots 重绘；手稿定位为开放 2D 协议/基准；生成自包含 HTML/MD/PDF 研究报告。
 

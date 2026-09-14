@@ -47,7 +47,10 @@ S2_CI_SCAN_MS: tuple[int, ...] = tuple(range(180, 321, 20))
 
 # Activation / stimulus
 ACTIVATION_THRESHOLD = 0.5
-STIM_U_PROTOCOL = 0.8
+# Split voltage-clamp target vs current-injection amplitude (may differ in scans).
+STIM_VOLTAGE = 0.8
+STIM_CURRENT = 0.8
+STIM_U_PROTOCOL = STIM_VOLTAGE  # backward-compat alias
 STIM_DURATION_MS = 2.0
 # Explicit Euler: diffusion CFL may allow dt ≫ τ_in; cap for upstroke accuracy.
 IONIC_DT_MAX_MS = 0.1

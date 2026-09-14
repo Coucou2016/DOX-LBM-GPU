@@ -1,112 +1,290 @@
 {
-  "generated_utc": "2026-09-13T16:57:05.547966+00:00",
-  "source": "Villar-Valero J Physiol 2025 healthy-tissue APD/CV anchors",
+  "generated_utc": "2026-09-14T08:50:08.412233+00:00",
+  "source": "Villar-Valero J Physiol 2026 healthy/fibrosis APD and CV anchors",
   "acceptance": "\u00b110% for apd_matched_0d / cv_matched; CFL must be stable",
+  "note": "Literature targets are data-only (CONTROL_target / DOX1_target / DOX2_target). Calibrated tau_close/D/lam are model parameters, not literature constants.",
   "phenotypes": [
     {
       "phenotype": "CONTROL",
       "literature": {
+        "name": "CONTROL_target",
         "apd_ms_target": 309.0,
+        "apd_fibrosis_ms_target": null,
         "cv_mm_per_ms_target": 0.71,
         "cv_cm_per_s_target": 71.0,
-        "source": "Villar-Valero J Physiol 2025: healthy-tissue APD 309 ms; fiber-direction CV 71 cm/s"
+        "source": "Villar-Valero J Physiol 2026: healthy-tissue APD 309 ms; fiber-direction CV 71 cm/s (0.71 mm/ms)"
       },
-      "tau_close": 184.0,
-      "D_mm2_per_ms": 0.0465,
+      "tau_close": 183.90293916609704,
+      "D_mm2_per_ms": 0.04734018518518519,
       "lam": 0.01,
-      "apd_ms_measured": 309.1,
-      "apd_error_ms": 0.10000000000002274,
-      "apd_error_pct": 0.032362459546932926,
+      "apd_ms_measured": 309.00000000000006,
+      "apd_error_ms": 5.684341886080802e-14,
+      "apd_error_pct": 1.839592843391845e-14,
       "apd_matched_0d": true,
-      "cv_mm_per_ms_measured": 0.7031250000000001,
-      "cv_error_mm_per_ms": -0.0068749999999998535,
-      "cv_error_pct": -0.968309859154909,
+      "cv_mm_per_ms_measured": 0.7086614173228345,
+      "cv_error_mm_per_ms": -0.0013385826771654674,
+      "cv_error_pct": -0.18853277143175598,
       "cv_matched": true,
-      "cfl_r": 0.07440000000000001,
+      "cfl_r": 0.07574429629629631,
       "dt_ms": 0.1,
-      "u_max": 0.8926737040206542,
+      "u_max": 0.8917710069628284,
       "preset_tau_close": 184.0,
       "preset_D_mm2_per_ms": 0.0465,
-      "apd_fit": null,
+      "apd_fit": {
+        "tau_close_star": 183.90293916609704,
+        "samples": [
+          {
+            "tau_close": 80.0,
+            "apd_ms": 139.20000000000002
+          },
+          {
+            "tau_close": 96.36363636363636,
+            "apd_ms": 166.10000000000002
+          },
+          {
+            "tau_close": 112.72727272727272,
+            "apd_ms": 192.90000000000003
+          },
+          {
+            "tau_close": 129.0909090909091,
+            "apd_ms": 219.70000000000002
+          },
+          {
+            "tau_close": 145.45454545454544,
+            "apd_ms": 246.40000000000003
+          },
+          {
+            "tau_close": 161.8181818181818,
+            "apd_ms": 273.1
+          },
+          {
+            "tau_close": 178.1818181818182,
+            "apd_ms": 299.70000000000005
+          },
+          {
+            "tau_close": 194.54545454545456,
+            "apd_ms": 326.3
+          },
+          {
+            "tau_close": 210.9090909090909,
+            "apd_ms": 352.8
+          },
+          {
+            "tau_close": 227.27272727272728,
+            "apd_ms": 379.40000000000003
+          },
+          {
+            "tau_close": 243.63636363636363,
+            "apd_ms": 405.90000000000003
+          },
+          {
+            "tau_close": 260.0,
+            "apd_ms": 432.3
+          },
+          {
+            "tau_close": 183.90293916609704,
+            "apd_ms": 309.00000000000006,
+            "interpolated": true
+          }
+        ]
+      },
       "cv_fit": {
-        "D_star": 0.0465,
-        "n_samples": 1
+        "D_star": 0.04734018518518519,
+        "n_samples": 8
       },
       "match_tol_frac": {
         "apd": 0.1,
         "cv": 0.1
       },
-      "notes": "0D APD via tau_close=184 \u2248309 ms (Villar-Valero control). Homogeneous CV at scaffold D_HEALTHY \u22480.70 mm/ms vs target 0.71."
+      "notes": "Calibrated model params aiming at CONTROL_target (APD 309 ms, CV 0.71 mm/ms). Not identical to literature numbers."
     },
     {
       "phenotype": "DOX1",
       "literature": {
+        "name": "DOX1_target",
         "apd_ms_target": 269.0,
+        "apd_fibrosis_ms_target": 276.0,
         "cv_mm_per_ms_target": 0.41,
         "cv_cm_per_s_target": 41.0,
-        "source": "Villar-Valero: DOX1 healthy-tissue APD 269 ms (\u221212.9%); CV 41 cm/s (\u221242.3%)"
+        "source": "Villar-Valero: DOX1 healthy APD 269 ms, fibrosis APD 276 ms; CV 41 cm/s (0.41 mm/ms)"
       },
-      "tau_close": 159.0,
-      "D_mm2_per_ms": 0.016,
+      "tau_close": 159.30541368743613,
+      "D_mm2_per_ms": 0.015493373680943508,
       "lam": 0.01,
-      "apd_ms_measured": 268.5,
-      "apd_error_ms": -0.5,
-      "apd_error_pct": -0.18587360594795538,
+      "apd_ms_measured": 269.0,
+      "apd_error_ms": 0.0,
+      "apd_error_pct": 0.0,
       "apd_matched_0d": true,
-      "cv_mm_per_ms_measured": 0.4245283018867927,
-      "cv_error_mm_per_ms": 0.014528301886792716,
-      "cv_error_pct": 3.5434882650713946,
+      "cv_mm_per_ms_measured": 0.4166666666666668,
+      "cv_error_mm_per_ms": 0.006666666666666821,
+      "cv_error_pct": 1.6260162601626393,
       "cv_matched": true,
-      "cfl_r": 0.0256,
+      "cfl_r": 0.024789397889509613,
       "dt_ms": 0.1,
-      "u_max": 0.942945772778133,
+      "u_max": 0.9446322459514994,
       "preset_tau_close": 159.0,
       "preset_D_mm2_per_ms": 0.016,
-      "apd_fit": null,
+      "apd_fit": {
+        "tau_close_star": 159.30541368743613,
+        "samples": [
+          {
+            "tau_close": 80.0,
+            "apd_ms": 139.20000000000002
+          },
+          {
+            "tau_close": 96.36363636363636,
+            "apd_ms": 166.10000000000002
+          },
+          {
+            "tau_close": 112.72727272727272,
+            "apd_ms": 192.90000000000003
+          },
+          {
+            "tau_close": 129.0909090909091,
+            "apd_ms": 219.70000000000002
+          },
+          {
+            "tau_close": 145.45454545454544,
+            "apd_ms": 246.40000000000003
+          },
+          {
+            "tau_close": 161.8181818181818,
+            "apd_ms": 273.1
+          },
+          {
+            "tau_close": 178.1818181818182,
+            "apd_ms": 299.70000000000005
+          },
+          {
+            "tau_close": 194.54545454545456,
+            "apd_ms": 326.3
+          },
+          {
+            "tau_close": 210.9090909090909,
+            "apd_ms": 352.8
+          },
+          {
+            "tau_close": 227.27272727272728,
+            "apd_ms": 379.40000000000003
+          },
+          {
+            "tau_close": 243.63636363636363,
+            "apd_ms": 405.90000000000003
+          },
+          {
+            "tau_close": 260.0,
+            "apd_ms": 432.3
+          },
+          {
+            "tau_close": 159.30541368743613,
+            "apd_ms": 269.0,
+            "interpolated": true
+          }
+        ]
+      },
       "cv_fit": {
-        "D_star": 0.016,
-        "n_samples": 1
+        "D_star": 0.015493373680943508,
+        "n_samples": 8
       },
       "match_tol_frac": {
         "apd": 0.1,
         "cv": 0.1
       },
-      "notes": "tau_close=159 \u2192 0D APD\u2248269 ms. Homogeneous D scaled for CV\u22480.41 mm/ms; annulus d_reduction=0.90 remains a fibrosis-zone relative cut for VA scans."
+      "notes": "Calibrated model params aiming at DOX1_target (healthy APD 269 ms, CV 0.41 mm/ms). Annulus d_reduction=0.90 is a fibrosis-zone relative cut for VA scans, not a literature constant."
     },
     {
       "phenotype": "DOX2",
       "literature": {
+        "name": "DOX2_target",
         "apd_ms_target": 210.0,
-        "cv_mm_per_ms_target": 0.44,
+        "apd_fibrosis_ms_target": 184.0,
+        "cv_mm_per_ms_target": 0.4389,
         "cv_cm_per_s_target": 43.89,
-        "source": "Villar-Valero: DOX2 healthy-tissue APD 210 ms (\u221232.0%); CV \u224843.89 cm/s (\u221238.2%)"
+        "source": "Villar-Valero: DOX2 healthy APD 210 ms, fibrosis APD 184 ms; CV 43.89 cm/s (0.4389 mm/ms)"
       },
-      "tau_close": 138.0,
-      "D_mm2_per_ms": 0.0265,
+      "tau_close": 138.0977845683728,
+      "D_mm2_per_ms": 0.026730000000000004,
       "lam": 0.1,
-      "apd_ms_measured": 209.9,
-      "apd_error_ms": -0.09999999999999432,
-      "apd_error_pct": -0.04761904761904491,
+      "apd_ms_measured": 210.1,
+      "apd_error_ms": 0.09999999999999432,
+      "apd_error_pct": 0.04761904761904491,
       "apd_matched_0d": true,
-      "cv_mm_per_ms_measured": 0.4411764705882355,
-      "cv_error_mm_per_ms": 0.0011764705882355009,
-      "cv_error_pct": 0.267379679144432,
+      "cv_mm_per_ms_measured": 0.44117647058823517,
+      "cv_error_mm_per_ms": 0.0022764705882351577,
+      "cv_error_pct": 0.5186763700695278,
       "cv_matched": true,
-      "cfl_r": 0.0424,
+      "cfl_r": 0.04276800000000001,
       "dt_ms": 0.1,
-      "u_max": 0.9361590205359779,
+      "u_max": 0.9363148848207407,
       "preset_tau_close": 138.0,
       "preset_D_mm2_per_ms": 0.0265,
-      "apd_fit": null,
+      "apd_fit": {
+        "tau_close_star": 138.0977845683728,
+        "samples": [
+          {
+            "tau_close": 80.0,
+            "apd_ms": 124.9
+          },
+          {
+            "tau_close": 96.36363636363636,
+            "apd_ms": 149.0
+          },
+          {
+            "tau_close": 112.72727272727272,
+            "apd_ms": 173.1
+          },
+          {
+            "tau_close": 129.0909090909091,
+            "apd_ms": 196.9
+          },
+          {
+            "tau_close": 145.45454545454544,
+            "apd_ms": 220.70000000000002
+          },
+          {
+            "tau_close": 161.8181818181818,
+            "apd_ms": 244.5
+          },
+          {
+            "tau_close": 178.1818181818182,
+            "apd_ms": 268.20000000000005
+          },
+          {
+            "tau_close": 194.54545454545456,
+            "apd_ms": 291.90000000000003
+          },
+          {
+            "tau_close": 210.9090909090909,
+            "apd_ms": 315.50000000000006
+          },
+          {
+            "tau_close": 227.27272727272728,
+            "apd_ms": 339.1
+          },
+          {
+            "tau_close": 243.63636363636363,
+            "apd_ms": 362.6
+          },
+          {
+            "tau_close": 260.0,
+            "apd_ms": 386.20000000000005
+          },
+          {
+            "tau_close": 138.0977845683728,
+            "apd_ms": 210.1,
+            "interpolated": true
+          }
+        ]
+      },
       "cv_fit": {
-        "D_star": 0.0265,
-        "n_samples": 1
+        "D_star": 0.026730000000000004,
+        "n_samples": 8
       },
       "match_tol_frac": {
         "apd": 0.1,
         "cv": 0.1
       },
-      "notes": "tau_close=138 at \u03bb=0.1 \u2192 0D APD\u2248210 ms; D=0.0265 \u2192 CV\u22480.44 mm/ms (matched within \u00b110% under stable CFL). Annulus d_reduction=0.70 for fibrosis zone."
+      "notes": "Calibrated model params aiming at DOX2_target (healthy APD 210 ms, CV 0.4389 mm/ms). DOX APD is shorter than CONTROL."
     }
   ],
   "all_apd_matched": true,

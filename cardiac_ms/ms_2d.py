@@ -22,6 +22,60 @@ from mitchell_schaeffer.ops import calc_J_in, calc_J_out, calc_rhs, get_paramete
 _CFL_FACTOR_2D = 4.0
 
 
+def _ordered_circulation_metrics(
+    probe_act_times: list[list[float]],
+) -> dict[str, Any]:
+    """
+    Infer ordered angular circulation from probe activation times.
+
+    Probes are assumed equally spaced in angular order. A complete lap is a
+    monotonic sweep (CW or CCW) visiting all probes; lap period is the mean
+    inter-visit period at the first probe when ≥2 visits exist.
+    """
+    n = len(probe_act_times)
+    empty = {"n_ordered_laps": 0, "direction": None, "lap_period_ms": None}
+    if n < 3:
+        return empty
+    # First activation time per probe (post-stim sequence index 0)
+    first = []
+    for times in probe_act_times:
+        if not times:
+            return empty
+        first.append(float(times[0]))
+    order = list(np.argsort(np.asarray(first, dtype=np.float64)))
+    # Expected CW: 0,1,2,...,n-1 (or rotation); CCW: reverse
+    def _is_circular_shift(seq: list[int], template: list[int]) -> bool:
+        m = len(template)
+        if len(seq) != m:
+            return False
+        doubled = template + template
+        return any(doubled[i : i + m] == seq for i in range(m))
+
+    cw = list(range(n))
+    ccw = list(range(n - 1, -1, -1))
+    direction = None
+    if _is_circular_shift(order, cw):
+        direction = "cw"
+    elif _is_circular_shift(order, ccw):
+        direction = "ccw"
+    # Complete ordered laps ≈ min number of post-stim activations across probes
+    n_laps = int(min(len(t) for t in probe_act_times))
+    lap_period = None
+    ref = probe_act_times[0]
+    if len(ref) >= 2:
+        diffs = np.diff(np.asarray(ref, dtype=np.float64))
+        if diffs.size:
+            lap_period = float(np.mean(diffs))
+    if direction is None and n_laps < 1:
+        return empty
+    return {
+        "n_ordered_laps": n_laps if direction is not None else 0,
+        "direction": direction,
+        "lap_period_ms": lap_period,
+        "first_activation_order": order,
+    }
+
+
 def suggest_dt_cfl(dx: float, D_max: float, *, safety: float = 0.45) -> float:
     """
     Suggest a stable explicit time step (ms) for 2D diffusion with D_max.
@@ -454,6 +508,8 @@ def simulate_mono2d(
     extra = list(extra_probes) if extra_probes else []
     extra_was = [False] * len(extra)
     extra_upstrokes = np.zeros(len(extra), dtype=np.int32)
+    # Post-stimulus activation times per angular probe (for ordered-lap metrics).
+    probe_act_times: list[list[float]] = [[] for _ in extra]
 
     # Default / auto: always conservative flux form (constant D ≡ D∇²u with corners).
     use_div = diffusion_mode in ("auto", "div")
@@ -558,6 +614,7 @@ def simulate_mono2d(
                     a = bool(u[int(qy), int(qx)] >= activation_threshold)
                     if a and not extra_was[i]:
                         extra_upstrokes[i] += 1
+                        probe_act_times[i].append(float(t_step))
                     extra_was[i] = a
 
         if snapshots and step in (n_steps // 4, n_steps // 2, n_steps - 1):
@@ -582,6 +639,20 @@ def simulate_mono2d(
     n_rotations_est = int(extra_upstrokes.min()) if extra_upstrokes.size else (
         max(0, n_upstrokes_post - 1) if track_reentry else 0
     )
+    circulation = _ordered_circulation_metrics(probe_act_times) if extra else {
+        "n_ordered_laps": 0,
+        "direction": None,
+        "lap_period_ms": None,
+    }
+    n_ordered_laps = int(circulation.get("n_ordered_laps") or 0)
+    if n_ordered_laps <= 0 and extra_upstrokes.size:
+        # Fallback: complete laps ≈ min upstroke count across angular probes.
+        n_ordered_laps = int(extra_upstrokes.min())
+        circulation = {
+            **circulation,
+            "n_ordered_laps": n_ordered_laps,
+            "direction": circulation.get("direction") or "unknown",
+        }
     activity_duty_cycle = (
         float(active_post_steps) / float(post_stim_steps) if post_stim_steps else 0.0
     )
@@ -628,6 +699,8 @@ def simulate_mono2d(
         "n_probes_relapped": int((extra_upstrokes >= 2).sum()) if extra else 0,
         "extra_upstrokes": extra_upstrokes.tolist() if track_reentry else None,
         "n_rotations_est": n_rotations_est if track_reentry else None,
+        "n_ordered_laps": n_ordered_laps if track_reentry else None,
+        "circulation": circulation if track_reentry else None,
         "activity_duty_cycle": activity_duty_cycle if track_reentry else None,
         "mean_excited_fraction_post": (
             mean_excited_fraction_post if track_reentry else None

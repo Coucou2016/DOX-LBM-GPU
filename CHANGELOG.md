@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased] — Round-2 major revision (P0)
+
+### Triple VA endpoints
+- `VA_paper`: persist ≥ 1000 ms **ONLY** (never OR cycle).
+- `VA_recurrence`: confirmed extra cycle / ordered circulation (default `label`; `VA_cycle` alias).
+- `VA_strict`: persist ≥ 1000 **and** recurrent circulation.
+- Phase-diagram CSV/summary report all three; manuscript wording updated.
+
+### Phenotypes / protocols
+- Literature TARGETS split from calibrated model params (`CONTROL_target` / `DOX1_target` / `DOX2_target`).
+- Villar-Valero anchors (*J Physiol* 2026): APD 309/269/210 (DOX shorter); fibrosis APD 276/184; CV 0.71/0.41/0.4389.
+- CONTROL: **no** ectopic extras; DOX1: 240/200/190; DOX2: 250×4. No invented 260/220/200/180.
+- Fixed CONTROL `d_reduction=0.0` falsy bug in `scripts/run_protocol_phenotype.py`.
+
+### Docs / packaging
+- ASSUMPTIONS: additive Euler (not operator splitting); `data/README.md` drops local MonoAlg3D tree claim.
+- `CITATION.cff`: preferred-citation is this software; related ref Javier Villar-Valero, 2026.
+- Title drops “not a 3D twin” into Abstract/Limitations; `.github/workflows/tests.yml` + `pyproject.toml`.
+- Optional `scripts/scan_capture_threshold.py`; `STIM_VOLTAGE` / `STIM_CURRENT` split.
+
 ## [Unreleased] — Major Revision gap-closing (P1)
 
 ### Phase singularity / rotor tip (auxiliary)
@@ -15,7 +35,6 @@
 
 ### API / hygiene
 - `simulate_mono2d` default `stimulus_mode="current"` (was voltage_clamp).
-- Abstract dual-endpoint wording clarified (`VA_paper` = persist≥1000 **or** cycle; `VA_cycle` = require cycle).
 - Removed machine-local absolute paths from `data/README.md`, `phase_diagram_summary.json`, javilva JSON note.
 
 ## [Unreleased] — Major Revision (peer-review P0)
@@ -27,7 +46,7 @@
 
 ### Solver / metrics
 - Constant-`D` path always uses `diffusion_div_D_grad_neumann`; Neumann Laplacian corners/edges fixed for full-domain equivalence.
-- Dual VA endpoints: `VA_paper` (persist ≥ 1000 ms **or** cycle evidence) and `VA_cycle` (require_cycle); phase-diagram CSV reports both.
+- Dual VA endpoints (superseded by Round-2 triple endpoints above).
 - `estimate_cv_from_activation` uses Euclidean `hypot` distance.
 - Optional `stimulus_mode="current"|"voltage_clamp"` (default current).
 

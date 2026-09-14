@@ -4,12 +4,16 @@
   "n_cells": 12,
   "n_va": 3,
   "n_non_va": 9,
-  "n_va_paper": 3,
+  "n_va_paper": 1,
+  "n_va_recurrence": 3,
+  "n_va_strict": 1,
   "n_va_cycle": 3,
-  "n_non_va_paper": 9,
+  "n_non_va_paper": 11,
+  "n_non_va_recurrence": 9,
+  "n_non_va_strict": 11,
   "n_non_va_cycle": 9,
-  "elapsed_s": 171.63178259995766,
-  "seconds_per_cell": 14.302648549996471,
+  "elapsed_s": 165.21920530009083,
+  "seconds_per_cell": 13.768267108340902,
   "full_grid_expected_s": null,
   "csv": "papers/data/phase_diagram.csv",
   "heatmap": "outputs/phase_diagram.png",
@@ -17,7 +21,8 @@
   "tau_close_ms": 150.0,
   "healthy_cv_band": "0.55-0.85 mm/ms (homogeneous sheet, same D)",
   "endpoints": {
-    "VA_paper": "persist>=1000 ms OR cycle evidence (Villar-Valero-style)",
-    "VA_cycle": "extra>=1 or relapped>=3 (default label)"
+    "VA_paper": "persist>=1000 ms ONLY (Villar-Valero; never OR cycle)",
+    "VA_recurrence": "extra>=1 or relapped>=3 (default label)",
+    "VA_strict": "persist>=1000 AND recurrent circulation"
   }
 }

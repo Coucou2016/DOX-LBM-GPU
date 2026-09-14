@@ -5,16 +5,25 @@ from cardiac_ms.protocol_s1s2 import (
     run_annulus_s1s2,
     run_reentry_positive_control,
     run_s1s2,
+    triple_va_labels,
 )
 from cardiac_ms.tissue_classes import disk_fibrosis_three_class
 
 
 def test_classify_reentry_paper_threshold():
+    # VA_paper: persist ONLY — cycle evidence must NOT flip paper label
     assert classify_reentry(999.0, threshold_ms=1000, require_cycle=False) == "Non-VA"
     assert classify_reentry(1000.0, threshold_ms=1000, require_cycle=False) == "VA"
+    assert (
+        classify_reentry(
+            999.0, threshold_ms=1000, require_cycle=False, n_extra_cycles=1
+        )
+        == "Non-VA"
+    )
+    # VA_recurrence (default require_cycle=True)
     assert classify_reentry(200.0, threshold_ms=1000, n_extra_cycles=1) == "VA"
     assert classify_reentry(200.0, threshold_ms=1000, n_extra_cycles=0) == "Non-VA"
-    # Plateau persist without a second upstroke is not VA under the default rule
+    # Plateau persist without a second upstroke is not VA under recurrence
     assert classify_reentry(1000.0, threshold_ms=1000, n_extra_cycles=0) == "Non-VA"
     assert (
         classify_reentry(
@@ -31,14 +40,55 @@ def test_classify_reentry_paper_threshold():
     )
 
 
-def test_dual_va_endpoints_disagree_on_plateau():
-    """Persist≥1000 without cycle → VA_paper but Non-VA under VA_cycle."""
-    from cardiac_ms.protocol_s1s2 import dual_va_labels
+def test_triple_va_endpoints():
+    """P0 triple endpoints: paper persist-only; strict = persist AND cycle."""
+    # persist=999, cycle=1 → VA_paper=Non-VA
+    d0 = triple_va_labels(999.0, n_extra_cycles=1, n_probes_relapped=0)
+    assert d0["VA_paper"] == "Non-VA"
+    assert d0["VA_recurrence"] == "VA"
+    assert d0["VA_strict"] == "Non-VA"
 
-    d = dual_va_labels(1000.0, n_extra_cycles=0, n_probes_relapped=0)
-    assert d["VA_paper"] == "VA"
-    assert d["VA_cycle"] == "Non-VA"
-    assert d["label"] == "Non-VA"
+    # persist=1000, cycle=0 → VA_paper=VA ; VA_strict=Non-VA
+    d1 = triple_va_labels(1000.0, n_extra_cycles=0, n_probes_relapped=0)
+    assert d1["VA_paper"] == "VA"
+    assert d1["VA_recurrence"] == "Non-VA"
+    assert d1["VA_strict"] == "Non-VA"
+    assert d1["VA_cycle"] == "Non-VA"  # alias
+    assert d1["label"] == "Non-VA"
+
+    # persist=1000, cycle>=1 → VA_strict=VA
+    d2 = triple_va_labels(1000.0, n_extra_cycles=1, n_probes_relapped=0)
+    assert d2["VA_paper"] == "VA"
+    assert d2["VA_recurrence"] == "VA"
+    assert d2["VA_strict"] == "VA"
+
+
+def test_control_d_reduction_exactly_zero():
+    """CONTROL d_reduction=0.0 must not be coerced via truthiness to 0.30."""
+    from cardiac_ms.phenotypes import get_phenotype
+
+    ph = get_phenotype("CONTROL")
+    assert float(ph["d_reduction"]) == 0.0
+    # Bug was: ``float(ph["d_reduction"]) if ph["d_reduction"] else 0.30``
+    buggy = float(ph["d_reduction"]) if ph["d_reduction"] else 0.30
+    assert buggy == 0.30  # documents the falsy-zero trap
+    fixed = float(ph.get("d_reduction", 0.0))
+    assert fixed == 0.0
+    assert tuple(ph["extra_cis_ms"]) == ()
+    assert ph["targets"]["apd_ms_target"] == 309.0
+
+
+def test_dox_protocols_and_shorter_apd_targets():
+    from cardiac_ms.phenotypes import PROTOCOL_EXTRAS, LITERATURE_TARGETS
+
+    assert PROTOCOL_EXTRAS["CONTROL"] == ()
+    assert PROTOCOL_EXTRAS["DOX1"] == (240.0, 200.0, 190.0)
+    assert PROTOCOL_EXTRAS["DOX2"] == (250.0, 250.0, 250.0, 250.0)
+    assert LITERATURE_TARGETS["DOX1"]["apd_ms_target"] < LITERATURE_TARGETS["CONTROL"]["apd_ms_target"]
+    assert LITERATURE_TARGETS["DOX2"]["apd_ms_target"] < LITERATURE_TARGETS["CONTROL"]["apd_ms_target"]
+    assert LITERATURE_TARGETS["DOX1"]["apd_fibrosis_ms_target"] == 276.0
+    assert LITERATURE_TARGETS["DOX2"]["apd_fibrosis_ms_target"] == 184.0
+    assert LITERATURE_TARGETS["DOX2"]["cv_mm_per_ms_target"] == 0.4389
 
 
 def test_no_fibrosis_is_non_va():
