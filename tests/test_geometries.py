@@ -36,5 +36,5 @@ def test_annulus_mask_and_stim_on_conducting_cells():
     assert cond[probe]
     sl_y, sl_x = s1
     assert cond[sl_y, sl_x].any()
-    assert len(probes) == 4
+    assert len(probes) == 12
     assert all(cond[p] for p in probes)

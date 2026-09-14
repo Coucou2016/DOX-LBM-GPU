@@ -1,26 +1,35 @@
 # Changelog
 
-## [Unreleased] — Round-2 major revision (P0)
+## [Unreleased] — Round-2 major revision (P0+P1)
 
 ### Triple VA endpoints
 - `VA_paper`: persist ≥ 1000 ms **ONLY** (never OR cycle).
 - `VA_recurrence`: confirmed extra cycle / ordered circulation (default `label`; `VA_cycle` alias).
 - `VA_strict`: persist ≥ 1000 **and** recurrent circulation.
 - Phase-diagram CSV/summary report all three; manuscript wording updated.
+- Unit tests lock: persist=999+cycle→paper Non-VA; persist=1000+cycle=0→paper VA / strict Non-VA; both→strict VA.
 
 ### Phenotypes / protocols
-- Literature TARGETS split from calibrated model params (`CONTROL_target` / `DOX1_target` / `DOX2_target`).
-- Villar-Valero anchors (*J Physiol* 2026): APD 309/269/210 (DOX shorter); fibrosis APD 276/184; CV 0.71/0.41/0.4389.
+- Literature TARGETS split from calibrated model params (`LITERATURE_TARGET` vs `CALIBRATED_MODEL` / `BENCHMARK_BASELINE`).
+- Villar-Valero anchors (*J Physiol* 2026; Epub 2025): APD 309/269/210 (DOX shorter); fibrosis APD 276/184; CV 0.71/0.41/0.4389.
 - CONTROL: **no** ectopic extras; DOX1: 240/200/190; DOX2: 250×4. No invented 260/220/200/180.
 - Fixed CONTROL `d_reduction=0.0` falsy bug in `scripts/run_protocol_phenotype.py`.
 
 ### Docs / packaging
-- ASSUMPTIONS: additive Euler (not operator splitting); `data/README.md` drops local MonoAlg3D tree claim.
-- `CITATION.cff`: preferred-citation is this software; related ref Javier Villar-Valero, 2026.
-- Title drops “not a 3D twin” into Abstract/Limitations; `.github/workflows/tests.yml` + `pyproject.toml`.
-- Optional `scripts/scan_capture_threshold.py`; `STIM_VOLTAGE` / `STIM_CURRENT` split.
+- Title: *A wavelength-aware 2D monodomain benchmark for auditable fibrosis–reentry protocols* (3D boundary in Abstract/Limitations).
+- Chinese separated to `papers/manuscript_zh.md`; English manuscript cleaned.
+- ASSUMPTIONS: additive Euler (not operator splitting); `data/README.md` drops local MonoAlg3D tree claim / absolute paths.
+- `CITATION.cff`: preferred-citation is this software; author placeholders; related ref Javier Villar-Valero, year 2026 with Epub 2025 note.
+- `.github/workflows/tests.yml` + `pyproject.toml` (`pip install -e .`).
 
-## [Unreleased] — Major Revision gap-closing (P1)
+### P1
+- `STIM_VOLTAGE_CLAMP_U` / `STIM_CURRENT_AMP` (+ aliases); capture scan documents Jc and ~1.5 Jc induction.
+- Annulus ordered angular probes default **12** (clamped 8–16); direction / lap period / complete laps → VA evidence.
+- `border_width_mm` physical API; dx/dt convergence CSV includes 0D APD tissue metric.
+- javilva λ∈{0.01,0.1,0.2,0.3} RHS cross-check green (machine-local paths sanitized in JSON).
+- Per-cell APD / R=L/(CV·APD) deferred (documented in phase summary); CV/path already in CSV.
+
+## [Unreleased] — Major Revision gap-closing (earlier P1)
 
 ### Phase singularity / rotor tip (auxiliary)
 - Added `cardiac_ms/phase_singularity.py`: 2D phase from (u,h) plane (optional Hilbert); topological-charge tip detection.

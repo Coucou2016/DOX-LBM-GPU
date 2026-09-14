@@ -1,41 +1,28 @@
-# A wavelength-aware 2D monodomain Mitchell–Schaeffer benchmark for DOX-inspired fibrosis–reentry protocols
-# 面向 DOX 启发纤维化–折返协议的波长感知二维单域 Mitchell–Schaeffer 基准
+# A wavelength-aware 2D monodomain benchmark for auditable fibrosis–reentry protocols
+
+English submission manuscript. Chinese draft: `papers/manuscript_zh.md`.
 
 ---
 
-## Title (EN)
+## Title
 
-**A wavelength-aware 2D monodomain Mitchell–Schaeffer protocol benchmark for doxorubicin-inspired fibrosis–reentry**
+**A wavelength-aware 2D monodomain benchmark for auditable fibrosis–reentry protocols**
 
-## 标题（中）
-
-**面向阿霉素启发纤维化–折返的波长感知二维单域 Mitchell–Schaeffer 协议基准**
+*(Dimensional / twin-reproduction boundary is stated in the Abstract and Limitations—not in the title.)*
 
 ---
 
-## Abstract (EN)
+## Abstract
 
 **Background.** Doxorubicin (DOX)–associated diffuse fibrosis can create an arrhythmogenic substrate. Personalized 3D MRI-based left-ventricular models that couple a λ-modified Mitchell–Schaeffer (MS) ionic law to a GPU Lattice–Boltzmann (LBM) monodomain solver have mapped inducibility under fibrotic excitability and conduction changes. The cell model, parameters, and sample anatomy are publicly documented (e.g. `javilva/doxorubicin_fibrosis_model`), while the production LBM–GPU solver remains proprietary—blocking independent protocol audit on the closed twin pipeline.
 
-**Methods.** We release an open CPU 2D finite-difference monodomain **protocol/benchmark** that implements the same λ-modified MS law, conservative diffusion \(\nabla\cdot(D\nabla u)\), three-class synthetic fibrosis tissue, and an S1–S2 stimulation train aligned with published coupling intervals. Homogeneous conduction velocity (CV) is calibrated to **≈0.70 mm/ms** (acceptance band 0.55–0.85) at \(D=0.0465\,\mathrm{mm}^2/\mathrm{ms}\). Time steps use **additive explicit Euler** (ionic + diffusion in one step; not operator splitting) with a diffusion CFL bound and an ionic upper limit of \(0.1\,\mathrm{ms}\). Default stimulus is **current injection** (`STIM_CURRENT`; voltage-clamp `STIM_VOLTAGE` remains available). We report **three VA endpoints**: `VA_paper` = persist ≥ 1000 ms **only** (Villar-Valero; never OR cycle); `VA_recurrence` (default `label`) = require re-excitation (extra≥1 or relapped≥3); `VA_strict` = persist ≥ 1000 **and** recurrent circulation. Optional 2D phase-singularity tip counts are auxiliary (not 3D filaments). Because a nominal healthy wavelength (\(\mathrm{CV}\times\mathrm{APD}\approx0.70\times250\approx175\,\mathrm{mm}\)) exceeds small disc domains (~24 mm), we use a pinned annulus as a **verification geometry** designed via wavelength (path ≈107 mm), not as a biological discovery claim.
+**Methods.** We release an open CPU 2D finite-difference monodomain **protocol/benchmark** that implements the same λ-modified MS law, conservative diffusion \(\nabla\cdot(D\nabla u)\), three-class synthetic fibrosis tissue, and an S1–S2 stimulation train aligned with published coupling intervals. Homogeneous conduction velocity (CV) is calibrated to **≈0.70 mm/ms** (acceptance band 0.55–0.85) at \(D=0.0465\,\mathrm{mm}^2/\mathrm{ms}\). Time steps use **additive explicit Euler** (ionic + diffusion in one step; not operator splitting) with a diffusion CFL bound and an ionic upper limit of \(0.1\,\mathrm{ms}\). Default stimulus is **current injection** (`STIM_CURRENT_AMP`; voltage-clamp `STIM_VOLTAGE_CLAMP_U` remains available). We report **three VA endpoints**: `VA_paper` = persist ≥ 1000 ms **only** (Villar-Valero; never OR cycle); `VA_recurrence` (default `label`) = require re-excitation (extra≥1 or relapped≥3); `VA_strict` = persist ≥ 1000 **and** recurrent circulation. Optional 2D phase-singularity tip counts are auxiliary (not 3D filaments). Using classical MS APD₉₀ ≈256.6 ms, a design wavelength \(\mathrm{CV}\times\mathrm{APD}\approx0.70\times257\approx180\,\mathrm{mm}\) already exceeds small disc domains (~24 mm); literature CONTROL APD 309 ms implies an even larger wavelength (~219 mm). We therefore use a pinned annulus as a **verification geometry** designed via wavelength (path ≈107 mm), not as a biological discovery claim. This work is **not** a 3D LBM–GPU twin reproduction (Abstract / Limitations; not the title).
 
-**Results.** Triple-endpoint counts on the annulus λ×D grid are reported from regenerated CSV (see Results tables). Zero-dimensional APD₉₀ equals **256.6 ms** under the classical MS golden regression. The annulus is a wavelength-designed verification circuit; disc geometry remains a negative control.
+**Results.** Triple-endpoint counts on the annulus λ×D grid are reported from regenerated CSV (see Results tables; no hand-filled counts). Zero-dimensional APD₉₀ equals **256.6 ms** under the classical MS golden regression. The annulus is a wavelength-designed verification circuit; disc geometry remains a negative control.
 
 **Conclusions.** The deliverable is an open methods and verification resource for protocol alignment and endpoint audit. It is **not** a 3D DOX twin, does **not** claim LBM–GPU performance or clinical ICD utility, and does **not** equate synthetic fibrosis with porcine DOX myocardium or ischemic MI.
 
 **Keywords:** cardiac electrophysiology; Mitchell–Schaeffer; monodomain; fibrosis; reentry; reproducibility; doxorubicin (protocol alignment)
-
----
-
-## 摘要（中）
-
-**背景。** 阿霉素相关弥漫纤维化可构成致心律失常基质。个性化三维左室模型将 λ 修正 Mitchell–Schaeffer 与 GPU 格子 Boltzmann 单域求解器结合以扫描诱发性。细胞模型/参数/样例解剖可公开对照，但生产用 LBM–GPU 求解器仍为专有，独立组难以在封闭孪生管线上审计协议与终点。
-
-**方法。** 本文提供开放的 CPU 二维有限差分单域**协议/基准**：实现同一 λ 修正 MS、守恒扩散 \(\nabla\cdot(D\nabla u)\)、合成三相纤维化，以及与文献耦合间期对齐的 S1–S2。均匀 CV 标定至约 **0.70 mm/ms**。默认刺激为电流注入。报告三重 VA 终点：`VA_paper`（persist≥1000 ms **仅此**）、`VA_recurrence`（要求再兴奋；默认 `label`）、`VA_strict`（persist≥1000 **且** 再入循环）。可选二维相位奇点计数仅为辅助指标。名义健康波长约 175 mm 远大于小圆盘，故采用按波长设计的钉扎环作为**验证几何**（非生物学发现）。
-
-**结果。** 环网格三重终点计数见 Results 表（由再生 CSV 锁定）。0D APD₉₀ 黄金回归为 **256.6 ms**。
-
-**结论。** 本工作是方法与验证资源，**不是**三维 DOX 孪生，也**不**声称 LBM–GPU 性能或临床 ICD 适应证。
 
 ---
 
@@ -99,7 +86,7 @@ and an ionic ceiling \(\Delta t\le 0.1\,\mathrm{ms}\).
 
 ### 3.4 Tissue classes and stimuli
 
-Tissue is labeled healthy / border / dense fibrosis (`border_width_mm` / `radius_mm` available alongside grid counts). Stimuli default to `stimulus_mode="current"` (`STIM_CURRENT`); `"voltage_clamp"` (`STIM_VOLTAGE`) remains available for legacy short regressions. Default S1: BCL = 400 ms, \(n=3\). Phenotype extras: CONTROL = none; DOX1 = 240/200/190 ms; DOX2 = 250×4. Induction and observation windows are separated (default observe 1000 ms).
+Tissue is labeled healthy / border / dense fibrosis (`border_width_mm` / `radius_mm` available alongside grid counts). Stimuli default to `stimulus_mode="current"` (`STIM_CURRENT_AMP`); `"voltage_clamp"` (`STIM_VOLTAGE_CLAMP_U`) remains available for legacy short regressions. Capture threshold \(J_c\) can be scanned (`scripts/scan_capture_threshold.py`); induction uses ≈1.5\(J_c\) when a measured \(J_c\) is available. Default S1: BCL = 400 ms, \(n=3\). Phenotype extras: CONTROL = none; DOX1 = 240/200/190 ms; DOX2 = 250×4. Induction and observation windows are separated (default observe 1000 ms). Annulus protocols place 8–16 ordered angular probes for direction / lap-period evidence.
 
 ### 3.5 Triple VA endpoints
 
@@ -155,7 +142,7 @@ Under spatially varying \(D\), `div(D∇u)` versus `D∇²u` can shift activatio
 
 ### 4.4 Annulus inducibility phase diagram (verification geometry)
 
-**Full 4×3 annulus grid** (DOX1-aligned extras 240/200/190 ms; \(\tau_{\mathrm{close}}=150\,\mathrm{ms}\); \(n_x=n_y=64\), \(\mathrm{d}x=0.75\,\mathrm{mm}\); path ≈106.8 mm; `stimulus_mode=current`; wall time ≈165 s). Source: `papers/data/phase_diagram.csv` (mode=`full`).
+**Full 4×3 annulus grid** (DOX1-aligned extras 240/200/190 ms; \(\tau_{\mathrm{close}}=150\,\mathrm{ms}\); \(n_x=n_y=64\), \(\mathrm{d}x=0.75\,\mathrm{mm}\); path ≈106.8 mm; 12 angular probes; `stimulus_mode=current`; wall time ≈190 s). Source: `papers/data/phase_diagram.csv` (mode=`full`).
 
 **Triple-endpoint summary (same 12 cells; regenerated after VA_paper persist-only fix):**
 
@@ -180,9 +167,9 @@ VA cell detail (from CSV; no fabricated statistics):
 
 | λ | D reduction | persist_ms | n_extra_cycles | n_probes_relapped | VA_recurrence | VA_paper | VA_strict |
 |---|-------------|------------|----------------|-------------------|---------------|----------|-----------|
-| 0.01 | 0.7 | 666.6 | 1 | 1 | VA | Non-VA | Non-VA |
-| 0.01 | 0.9 | 1000.0 | 2 | 3 | VA | VA | VA |
-| 0.1 | 0.3 | 632.5 | 1 | 1 | VA | Non-VA | Non-VA |
+| 0.01 | 0.7 | 666.6 | 1 | 5 | VA | Non-VA | Non-VA |
+| 0.01 | 0.9 | 1000.0 | 2 | 9 | VA | VA | VA |
+| 0.1 | 0.3 | 632.5 | 1 | 4 | VA | Non-VA | Non-VA |
 
 At λ∈{0.2,0.3} all D reductions are Non-VA (functional block on the verification ring)—a geometric/excitability bound that already prevents matching a richer 3D inducibility map.
 
@@ -206,7 +193,7 @@ Small discs are expected to be all Non-VA (wavelength mismatch). Homogeneous sna
 
 ### 5.1 Why 2D must not reproduce the 3D inducibility map
 
-A healthy design wavelength \(\lambda_{\mathrm{wave}}\approx0.70\times250\approx175\,\mathrm{mm}\) already exceeds typical small 2D discs (~24 mm). On the verification annulus (path ≈107 mm), D↓90% shortens wavelength to roughly \(\sqrt{0.1}\times0.70\times250\approx55\,\mathrm{mm}\), while D↓30% remains \(\approx147\,\mathrm{mm}\)—so inducibility is dominated by **wavelength vs path**, not by the 3D maze corridors of porcine LGE. At high fibrotic λ (0.2–0.3), the ring approaches functional block and collapses toward Non-VA even when D is reduced. Therefore a 2D λ×D heatmap **cannot** and **should not** be expected to match 3D twin inducibility fractions; discrepancy with the paper’s 3D map is a geometric and dimensional bound, not a calibration failure of this benchmark.
+A healthy design wavelength \(\lambda_{\mathrm{wave}}\approx0.70\times257\approx180\,\mathrm{mm}\) (classical MS APD₉₀; literature CONTROL 309 ms ⇒ ~219 mm) already exceeds typical small 2D discs (~24 mm). On the verification annulus (path ≈107 mm), D↓90% shortens wavelength enough that geometry can admit reentry, while D↓30% remains long relative to the path—so inducibility is dominated by **wavelength vs path**, not by the 3D maze corridors of porcine LGE. At high fibrotic λ (0.2–0.3), the ring approaches functional block and collapses toward Non-VA even when D is reduced. Therefore a 2D λ×D heatmap **cannot** and **should not** be expected to match 3D twin inducibility fractions; discrepancy with the paper’s 3D map is a geometric and dimensional bound, not a calibration failure of this benchmark.
 
 This stance matches Chabiniok–Zaha’s call to open methods: the scaffold lowers the cost of **protocol reproduction and endpoint audit**, rather than replacing personalized 3D twins.
 
@@ -245,6 +232,7 @@ Core package `cardiac_ms/`, tests `tests/`, phase diagram `scripts/run_phase_dia
 | 0D APD = 256.6 ms | golden regression + Fig.1 | supported |
 | CV ≈ 0.70 mm/ms @ D=0.0465 | validation + calibrate_cv | supported |
 | Full-domain constant-D operator match | diffusion tests | supported |
-| Dual VA endpoints reported | protocol + phase CSV | supported |
+| Triple VA endpoints reported | protocol + phase CSV | supported |
+| Literature CONTROL/DOX APD/CV targets | phenotypes.py + calibration JSON | supported (targets vs ±10% matched flags) |
 | Open protocol/benchmark contribution | repo + pytest | supported (methods) |
 | 3D DOX twin equivalence | — | **not claimed** |

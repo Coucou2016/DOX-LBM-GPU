@@ -47,10 +47,14 @@ S2_CI_SCAN_MS: tuple[int, ...] = tuple(range(180, 321, 20))
 
 # Activation / stimulus
 ACTIVATION_THRESHOLD = 0.5
-# Split voltage-clamp target vs current-injection amplitude (may differ in scans).
-STIM_VOLTAGE = 0.8
-STIM_CURRENT = 0.8
-STIM_U_PROTOCOL = STIM_VOLTAGE  # backward-compat alias
+# Canonical names (units: dimensionless u for clamp; J_stim amplitude for current).
+# Capture threshold Jc is measured by scripts/scan_capture_threshold.py;
+# induction protocols use ~1.5×Jc once Jc is known (default 0.8 ≈ safe above Jc).
+STIM_VOLTAGE_CLAMP_U = 0.8
+STIM_CURRENT_AMP = 0.8
+STIM_VOLTAGE = STIM_VOLTAGE_CLAMP_U  # alias
+STIM_CURRENT = STIM_CURRENT_AMP  # alias
+STIM_U_PROTOCOL = STIM_VOLTAGE_CLAMP_U  # backward-compat alias
 STIM_DURATION_MS = 2.0
 # Explicit Euler: diffusion CFL may allow dt ≫ τ_in; cap for upstroke accuracy.
 IONIC_DT_MAX_MS = 0.1

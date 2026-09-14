@@ -414,7 +414,7 @@ def run_reentry_positive_control(
     """
     Cross-field S1–S2 spiral on a 64² sheet.
 
-    Paper healthy wavelength (CV×APD ≈ 0.7 mm/ms × 250 ms ≈ 175 mm) does not
+    Paper healthy design wavelength (CV×APD ≈ 0.7 mm/ms × 257 ms ≈ 180 mm) does not
     fit in a 32 mm disk, so this control shortens ``tau_close`` to 80 ms
     (2D surrogate APD) while keeping calibrated D and λ=0.01. That is a
     numerical accommodation, not a Villar-Valero parameter.

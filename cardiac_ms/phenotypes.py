@@ -75,6 +75,18 @@ LITERATURE_TARGET_ALIASES: dict[str, str] = {
     "CONTROL_TARGET": "CONTROL",
     "DOX1_TARGET": "DOX1",
     "DOX2_TARGET": "DOX2",
+    "LITERATURE_TARGET_CONTROL": "CONTROL",
+    "LITERATURE_TARGET_DOX1": "DOX1",
+    "LITERATURE_TARGET_DOX2": "DOX2",
+}
+
+# Calibrated / baseline aliases → PHENOTYPES keys (model params, not literature).
+CALIBRATED_MODEL_ALIASES: dict[str, str] = {
+    "CALIBRATED_MODEL_CONTROL": "CONTROL",
+    "CALIBRATED_MODEL_DOX1": "DOX1",
+    "CALIBRATED_MODEL_DOX2": "DOX2",
+    "BENCHMARK_BASELINE": "CONTROL",
+    "BENCHMARK_BASELINE_CONTROL": "CONTROL",
 }
 
 # Protocol extras (coupling intervals relative to previous beat).
@@ -201,9 +213,16 @@ def get_phenotype(name: str) -> dict[str, Any]:
             "cv_matched": False,
             "apd_matched_0d": False,
         }
+    if key in CALIBRATED_MODEL_ALIASES:
+        key = CALIBRATED_MODEL_ALIASES[key]
     if key not in PHENOTYPES:
-        raise KeyError(f"Unknown phenotype {name!r}; choose from {sorted(PHENOTYPES)}")
-    return deepcopy(PHENOTYPES[key])
+        raise KeyError(
+            f"Unknown phenotype {name!r}; choose from "
+            f"{sorted(PHENOTYPES) + sorted(LITERATURE_TARGET_ALIASES) + sorted(CALIBRATED_MODEL_ALIASES)}"
+        )
+    out = deepcopy(PHENOTYPES[key])
+    out["kind"] = "calibrated_model"
+    return out
 
 
 def list_phenotypes() -> list[str]:

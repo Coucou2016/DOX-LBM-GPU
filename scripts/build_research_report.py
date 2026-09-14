@@ -267,10 +267,10 @@ D=0.0465 mm²/ms。</li>
 <li>横轴：纤维化区扩散降幅 D<sub>fib</sub> reduction（传导变慢；0.3/0.7/0.9 对应降 30/70/90%）。</li>
 <li>纵轴：兴奋性参数 λ<sub>fib</sub>（抬高内向电流阈值；健康 0.01，0.3 近功能阻滞）。</li>
 <li>暖色=VA，冷色=Non-VA；本报告嵌入 <strong>完整 4×3（12 格）</strong>：<strong>VA 3 / Non-VA 9</strong>。</li>
-<li>VA 格点（务必对照表1）：λ=0.01×D↓70%（persist 666.7 ms，extra=1）；
-λ=0.01×D↓90%（persist 1000 ms，extra=2，relapped=3）；
-λ=0.1×D↓30%（persist 632.9 ms，extra=1）。两格 persist&lt;1000 ms，
-说明 cycle-required 终点<strong>不</strong>退化为 persist 阈值。</li>
+<li>VA 格点（务必对照表1）：λ=0.01×D↓70%（persist 666.6 ms，extra=1，relapped=5）；
+λ=0.01×D↓90%（persist 1000 ms，extra=2，relapped=9）；
+λ=0.1×D↓30%（persist 632.5 ms，extra=1，relapped=4）。两格 persist&lt;1000 ms，
+说明 recurrence 终点<strong>不</strong>退化为 persist 阈值。</li>
 <li>λ≥0.2 全 Non-VA；λ=0.1 在强减速下亦 Non-VA——可作机制讨论素材，
 <strong>禁止</strong>外推为猪 LV 或临床 DOX 的定量规律。</li>
 </ul>
@@ -868,11 +868,17 @@ def main() -> int:
                 pdf_method + "\n", encoding="utf-8"
             )
 
+    def _rel(p: Path) -> str:
+        try:
+            return p.resolve().relative_to(ROOT).as_posix()
+        except ValueError:
+            return p.as_posix()
+
     meta = {
-        "html": str(html_path),
-        "report_html": str(report_html),
-        "md": str(md_path),
-        "pdf": str(pdf_path) if pdf_path.is_file() else None,
+        "html": _rel(html_path),
+        "report_html": _rel(report_html),
+        "md": _rel(md_path),
+        "pdf": _rel(pdf_path) if pdf_path.is_file() else None,
         "pdf_method": pdf_method,
         "html_bytes": html_path.stat().st_size,
         "md_bytes": md_path.stat().st_size,

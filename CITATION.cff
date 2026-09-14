@@ -3,6 +3,10 @@ title: "Fibrosis-Reentry-MS2D (DOX-LBM-GPU): wavelength-aware 2D monodomain benc
 message: "If you use this software, please cite it as below."
 type: software
 authors:
+  # Placeholder structure until named authors are finalized for submission.
+  - family-names: "[Author]"
+    given-names: "[Given]"
+    affiliation: "[Affiliation to be completed]"
   - name: "DOX-LBM-GPU / Fibrosis-Reentry-MS2D contributors"
 repository-code: "https://github.com/Coucou2016/DOX-LBM-GPU"
 url: "https://github.com/Coucou2016/DOX-LBM-GPU"
@@ -23,6 +27,8 @@ keywords:
 preferred-citation:
   type: software
   authors:
+    - family-names: "[Author]"
+      given-names: "[Given]"
     - name: "DOX-LBM-GPU / Fibrosis-Reentry-MS2D contributors"
   title: "Fibrosis-Reentry-MS2D (DOX-LBM-GPU): wavelength-aware 2D monodomain benchmark"
   year: 2026
@@ -38,4 +44,6 @@ references:
       cardiotoxicity
     journal: The Journal of Physiology
     year: 2026
+    # Journal of Physiology article; online/Epub available 2025 (doi:10.1113/jp288819).
+    notes: "Epub / online ahead of print 2025; journal year 2026."
     doi: 10.1113/jp288819

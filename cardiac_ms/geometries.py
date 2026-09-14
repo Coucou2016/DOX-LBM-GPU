@@ -2,10 +2,11 @@
 
 Units: mm, ms. Wavelength λ_wave ≈ CV × APD.
 
-Healthy paper-scale: CV=0.70 mm/ms, APD≈250 ms → λ_wave≈175 mm.
+Design scale (classical MS APD₉₀≈256.6 ms): CV=0.70 mm/ms → λ_wave≈180 mm.
+Literature CONTROL APD 309 ms implies an even larger wavelength (~219 mm).
 A 48² × 0.5 mm disc (24 mm) cannot host that rotor; it remains a documented
 negative. The default inducibility geometry is a **pinned annulus** whose
-mean path (~100 mm) sits between λ(D↓30%) and λ(D↓90%) so the same S1–S2
+mean path (~107 mm) sits below healthy design wavelength so the same S1–S2
 protocol can produce both Non-VA (fast circuit) and VA (slow circuit) at
 calibrated healthy τ_close.
 """
@@ -21,8 +22,9 @@ from cardiac_ms.constants import (
     TAU_CLOSE,
 )
 
-# APD90 analog for default MS (measured ~250–260 ms at τ_close=150).
-APD_HEALTHY_MS = 250.0
+# Design APD for wavelength bookkeeping: classical MS APD90 ≈256.6 ms at
+# τ_close=150 (not Villar-Valero CONTROL literature 309 ms).
+APD_HEALTHY_MS = 256.6
 
 
 def wavelength_mm(cv_mm_per_ms: float = CV_TARGET_MM_PER_MS, apd_ms: float = APD_HEALTHY_MS) -> float:
@@ -190,9 +192,14 @@ def annulus_angular_probes(conducting: np.ndarray, n: int = 4) -> list[tuple[int
 
 def annulus_stim_regions(
     conducting: np.ndarray,
+    *,
+    n_angular_probes: int = 12,
 ) -> tuple[tuple[slice, slice], tuple[slice, slice], tuple[int, int], list[tuple[int, int]]]:
     """
-    Compact leftmost S1, same-site premature S2, opposite probe, 4 angular probes.
+    Compact leftmost S1, same-site premature S2, opposite probe, angular probes.
+
+    Default ``n_angular_probes=12`` (range 8–16) for ordered-lap / direction
+    evidence wired into ``VA_strict`` via ``n_ordered_laps``.
 
     A large chord stimulus can hold a long arc depolarized (persist≥1000 ms
     with zero extra upstrokes). Premature S2 at the S1 site is the classic
@@ -206,6 +213,7 @@ def annulus_stim_regions(
     y_s, x_s = int(ys[i_left]), int(xs[i_left])
     s1 = _compact_patch(y_s, x_s, ny, nx, half=2)
     s2 = s1
-    probes = annulus_angular_probes(conducting, n=4)
-    probe = probes[2] if len(probes) >= 3 else probes[0]
+    n = int(max(8, min(16, n_angular_probes)))
+    probes = annulus_angular_probes(conducting, n=n)
+    probe = probes[n // 2] if len(probes) >= 3 else probes[0]
     return s1, s2, probe, probes

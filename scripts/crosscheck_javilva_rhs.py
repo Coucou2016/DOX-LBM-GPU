@@ -46,7 +46,11 @@ def main() -> int:
 
     note = None
     if EXT.is_dir() and (EXT / "model" / "mitchell_schaeffer.py").is_file():
-        note = f"Found clone at {EXT} (solver proprietary per their README)."
+        # Relative path only — never embed machine-local absolute roots in JSON.
+        note = (
+            "Found clone at _ext_dox_fibrosis "
+            "(solver proprietary per their README)."
+        )
         # Prefer importing their module if torch available
         sys.path.insert(0, str(EXT))
         try:

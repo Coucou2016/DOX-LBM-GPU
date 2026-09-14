@@ -1,6 +1,6 @@
 # DOX 纤维化折返协议的开放二维单域脚手架：学术研究报告
 
-生成日期：2026-09-14 · 仓库：Fibrosis-Reentry-MS2D (DOX-LBM-GPU) · 性质：2D 协议/基准研究报告（非临床决策工具）
+生成日期：2026-09-15 · 仓库：Fibrosis-Reentry-MS2D (DOX-LBM-GPU) · 性质：2D 协议/基准研究报告（非临床决策工具）
 
 对照：Villar-Valero et al., J Physiol 2025 (doi:10.1113/jp288819)；Chabiniok & Zaha (doi:10.1113/jp290313)。
 相图摘要：VA=3 / Non-VA=9。
@@ -123,9 +123,9 @@ VA_paper：persist≥1000 ms 仅此（从不 OR 周期）；VA_recurrence（默�
 | geometry | lambda_fib | d_reduction | label | va | activation_persists_ms | n_extra_cycles | n_probes_relapped | path_mm |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | annulus | 0.01 | 0.3 | Non-VA | 0 | 394.60000000000014 | 0 | 0 | 106.81415022205297 |
-| annulus | 0.01 | 0.7 | VA | 1 | 666.5999999999999 | 1 | 1 | 106.81415022205297 |
-| annulus | 0.01 | 0.9 | VA | 1 | 1000.0 | 2 | 3 | 106.81415022205297 |
-| annulus | 0.1 | 0.3 | VA | 1 | 632.5 | 1 | 1 | 106.81415022205297 |
+| annulus | 0.01 | 0.7 | VA | 1 | 666.5999999999999 | 1 | 5 | 106.81415022205297 |
+| annulus | 0.01 | 0.9 | VA | 1 | 1000.0 | 2 | 9 | 106.81415022205297 |
+| annulus | 0.1 | 0.3 | VA | 1 | 632.5 | 1 | 4 | 106.81415022205297 |
 | annulus | 0.1 | 0.7 | Non-VA | 0 | 0.0 | 0 | 0 | 106.81415022205297 |
 | annulus | 0.1 | 0.9 | Non-VA | 0 | 0.0 | 0 | 0 | 106.81415022205297 |
 | annulus | 0.2 | 0.3 | Non-VA | 0 | 0.0 | 0 | 0 | 106.81415022205297 |
@@ -249,10 +249,10 @@ D=0.0465 mm²/ms。
 横轴：纤维化区扩散降幅 Dfib reduction（传导变慢；0.3/0.7/0.9 对应降 30/70/90%）。
 纵轴：兴奋性参数 λfib（抬高内向电流阈值；健康 0.01，0.3 近功能阻滞）。
 暖色=VA，冷色=Non-VA；本报告嵌入 完整 4×3（12 格）：VA 3 / Non-VA 9。
-VA 格点（务必对照表1）：λ=0.01×D↓70%（persist 666.7 ms，extra=1）；
-λ=0.01×D↓90%（persist 1000 ms，extra=2，relapped=3）；
-λ=0.1×D↓30%（persist 632.9 ms，extra=1）。两格 persist<1000 ms，
-说明 cycle-required 终点不退化为 persist 阈值。
+VA 格点（务必对照表1）：λ=0.01×D↓70%（persist 666.6 ms，extra=1，relapped=5）；
+λ=0.01×D↓90%（persist 1000 ms，extra=2，relapped=9）；
+λ=0.1×D↓30%（persist 632.5 ms，extra=1，relapped=4）。两格 persist<1000 ms，
+说明 recurrence 终点不退化为 persist 阈值。
 λ≥0.2 全 Non-VA；λ=0.1 在强减速下亦 Non-VA——可作机制讨论素材，
 禁止外推为猪 LV 或临床 DOX 的定量规律。
 
@@ -356,7 +356,8 @@ doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图�
 
 
 平台期 vs 真折返。完整 CSV 中，VA 格点可有 persist<1000 但 extra≥1；
-反之，平台滞留可 persist≥1000 而 extra=0 → VA_cycle=Non-VA / VA_paper=VA。终点定义必须写进方法学。
+反之，平台滞留可 persist≥1000 而 extra=0 → VA_recurrence=Non-VA / VA_paper=VA；
+再入而 persist<1000 → VA_recurrence=VA / VA_paper=Non-VA。终点定义必须写进方法学。
 
 
 ## 七、结论
@@ -365,9 +366,9 @@ doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图�
 
 - CV≈0.70 mm/ms 与 0D APD=256.6 ms 黄金回归提供量级锚定。
 
-- 双重 VA 终点使文献 persist 规则与周期硬化规则可并列审计。
+- 三重 VA 终点使文献 persist-only、再入循环与严格合取规则可并列审计。
 
-- 波长感知环验证几何恢复混合相图（完整网格 VA 3 / Non-VA 9）。
+- 波长感知环验证几何恢复混合相图（VA_recurrence 3 / Non-VA 9；VA_paper 1；VA_strict 1）。
 
 - 工作边界清晰：非 3D LBM、非猪 DOX 数据复现、非临床 ICD 工具。
 

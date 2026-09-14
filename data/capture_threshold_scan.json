@@ -1,6 +1,11 @@
 {
-  "STIM_VOLTAGE": 0.8,
-  "STIM_CURRENT": 0.8,
+  "STIM_VOLTAGE_CLAMP_U": 0.8,
+  "STIM_CURRENT_AMP": 0.8,
+  "units": {
+    "STIM_VOLTAGE_CLAMP_U": "dimensionless u clamp target",
+    "STIM_CURRENT_AMP": "J_stim amplitude added during stim window"
+  },
+  "induction_rule": "use ~1.5 * Jc for induction once Jc is measured",
   "amps": [
     0.05,
     0.1,
@@ -56,54 +61,8 @@
           "captured": true
         }
       ],
-      "threshold_amp": 0.05
-    },
-    "voltage_clamp": {
-      "rows": [
-        {
-          "stimulus_mode": "voltage_clamp",
-          "amp": 0.05,
-          "u_max": 0.9449873733120439,
-          "captured": true
-        },
-        {
-          "stimulus_mode": "voltage_clamp",
-          "amp": 0.1,
-          "u_max": 0.9449873733120439,
-          "captured": true
-        },
-        {
-          "stimulus_mode": "voltage_clamp",
-          "amp": 0.2,
-          "u_max": 0.9449873733120439,
-          "captured": true
-        },
-        {
-          "stimulus_mode": "voltage_clamp",
-          "amp": 0.4,
-          "u_max": 0.9449873733120439,
-          "captured": true
-        },
-        {
-          "stimulus_mode": "voltage_clamp",
-          "amp": 0.6,
-          "u_max": 0.9449873733120439,
-          "captured": true
-        },
-        {
-          "stimulus_mode": "voltage_clamp",
-          "amp": 0.8,
-          "u_max": 0.9449873733120439,
-          "captured": true
-        },
-        {
-          "stimulus_mode": "voltage_clamp",
-          "amp": 1.0,
-          "u_max": 0.9449873733120439,
-          "captured": true
-        }
-      ],
-      "threshold_amp": 0.05
+      "threshold_amp_Jc": 0.05,
+      "induction_amp_1p5_Jc": 0.07500000000000001
     }
   }
 }

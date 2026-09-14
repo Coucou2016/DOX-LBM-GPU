@@ -3,7 +3,7 @@
 **Also known as:** DOX-LBM-GPU (GitHub repository name unchanged)  
 **Public repo:** https://github.com/Coucou2016/DOX-LBM-GPU
 
-Open **2D monodomain protocol / benchmark** for wavelength-aware fibrosis–reentry studies, inspired by Villar-Valero et al. (STACOM 2024 / *J Physiol* 2026) doxorubicin (DOX) fibrosis work. This is a **protocol-aligned verification scaffold**, not a 3D LBM–GPU reproduction and **not** a DOX digital twin.
+Open **2D monodomain protocol / benchmark** for auditable, wavelength-aware fibrosis–reentry studies (*A wavelength-aware 2D monodomain benchmark for auditable fibrosis–reentry protocols*), inspired by Villar-Valero et al. (STACOM 2024 / *J Physiol* 2026; Epub 2025). Dimensional / twin-reproduction bounds are stated in the Abstract and Limitations—not in the title.
 
 > **Credibility bound:** CPU **2D finite-difference monodomain** ≠ 3D LBM; synthetic fibrosis ≠ porcine DOX myocardium ≠ ischemic MI. Quantitative goals are equation/protocol alignment, CV order of magnitude, and auditable VA endpoints.
 

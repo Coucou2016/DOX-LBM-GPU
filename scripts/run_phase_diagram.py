@@ -3,8 +3,9 @@
 Inducibility phase diagram: λ_fib × D_fib reduction → VA / Non-VA.
 
 Default geometry is a **pinned annulus** sized so the circuit path (~107 mm)
-sits between healthy wavelength (~175 mm) and D↓90% wavelength (~55 mm).
-That yields mixed VA / Non-VA at calibrated healthy τ_close=150 ms.
+sits below healthy design wavelength (~180 mm using classical MS APD₉₀≈257 ms;
+literature CONTROL APD 309 ms ⇒ ~219 mm) and can admit reentry after strong D
+reduction. That yields mixed VA / Non-VA at calibrated healthy τ_close=150 ms.
 
 ``--geometry disc`` is the paper-like 2D LGE disk; on a 24 mm sheet it is a
 documented negative (wavelength does not fit).
@@ -35,6 +36,14 @@ from cardiac_ms.constants import (
 from cardiac_ms.geometries import annulus_wavelength_report, default_annulus_spec
 from cardiac_ms.protocol_s1s2 import run_annulus_s1s2, run_s1s2
 from cardiac_ms.tissue_classes import disk_fibrosis_three_class
+
+
+def _rel(path: Path) -> str:
+    """Repo-relative POSIX path for JSON (never machine-local absolute roots)."""
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def parse_args() -> argparse.Namespace:
@@ -343,11 +352,16 @@ def main() -> int:
         "elapsed_s": elapsed,
         "seconds_per_cell": elapsed / n_total if n_total else None,
         "full_grid_expected_s": full_expected,
-        "csv": str(csv_path),
-        "heatmap": str(png),
+        "csv": _rel(csv_path),
+        "heatmap": _rel(png),
         "wavelength_note": None if wave is None else wave.note,
         "tau_close_ms": TAU_CLOSE,
         "healthy_cv_band": "0.55-0.85 mm/ms (homogeneous sheet, same D)",
+        "n_angular_probes": 12,
+        "per_cell_apd_or_R": (
+            "deferred: CSV already stores cv_mm_per_ms / path_mm; "
+            "full APD90 and R=path/(CV*APD) per cell left for a future sweep"
+        ),
         "endpoints": {
             "VA_paper": "persist>=1000 ms ONLY (Villar-Valero; never OR cycle)",
             "VA_recurrence": "extra>=1 or relapped>=3 (default label)",
@@ -364,10 +378,13 @@ def main() -> int:
         papers_data.mkdir(parents=True, exist_ok=True)
         curated_csv = papers_data / "phase_diagram.csv"
         curated_csv.write_text(csv_path.read_text(encoding="utf-8"), encoding="utf-8")
+        curated_summary = dict(summary)
+        curated_summary["csv"] = "papers/data/phase_diagram.csv"
+        curated_summary["heatmap"] = _rel(png)
         (papers_data / "phase_diagram_summary.json").write_text(
-            json.dumps(summary, indent=2), encoding="utf-8"
+            json.dumps(curated_summary, indent=2), encoding="utf-8"
         )
-        summary["curated_csv"] = str(curated_csv)
+        summary["curated_csv"] = "papers/data/phase_diagram.csv"
         print(f"Wrote curated {curated_csv}")
     print(json.dumps(summary, indent=2))
     print(f"Wrote {csv_path}")

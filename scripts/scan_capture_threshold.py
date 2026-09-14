@@ -19,7 +19,11 @@ if str(ROOT) not in sys.path:
 
 import numpy as np
 
-from cardiac_ms.constants import STIM_CURRENT, STIM_DURATION_MS, STIM_VOLTAGE
+from cardiac_ms.constants import (
+    STIM_CURRENT_AMP,
+    STIM_DURATION_MS,
+    STIM_VOLTAGE_CLAMP_U,
+)
 from cardiac_ms.ms_2d import simulate_mono2d
 from cardiac_ms.protocol_s1s2 import Stimulus
 
@@ -41,7 +45,7 @@ def scan_capture(
                 0.0,
                 STIM_DURATION_MS,
                 region,
-                stim_u=STIM_VOLTAGE if stimulus_mode == "voltage_clamp" else amp,
+                stim_u=STIM_VOLTAGE_CLAMP_U if stimulus_mode == "voltage_clamp" else amp,
                 stim_amp=amp,
             )
         ]
@@ -75,8 +79,13 @@ def main() -> int:
     args = ap.parse_args()
     amps = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
     report: dict = {
-        "STIM_VOLTAGE": STIM_VOLTAGE,
-        "STIM_CURRENT": STIM_CURRENT,
+        "STIM_VOLTAGE_CLAMP_U": STIM_VOLTAGE_CLAMP_U,
+        "STIM_CURRENT_AMP": STIM_CURRENT_AMP,
+        "units": {
+            "STIM_VOLTAGE_CLAMP_U": "dimensionless u clamp target",
+            "STIM_CURRENT_AMP": "J_stim amplitude added during stim window",
+        },
+        "induction_rule": "use ~1.5 * Jc for induction once Jc is measured",
         "amps": amps,
         "scans": {},
     }
@@ -84,11 +93,15 @@ def main() -> int:
     for mode in modes:
         rows = scan_capture(amps=amps, stimulus_mode=mode)
         captured = [r["amp"] for r in rows if r["captured"]]
+        jc = float(min(captured)) if captured else None
         report["scans"][mode] = {
             "rows": rows,
-            "threshold_amp": float(min(captured)) if captured else None,
+            "threshold_amp_Jc": jc,
+            "induction_amp_1p5_Jc": (1.5 * jc) if jc is not None else None,
         }
-        print(f"{mode}: threshold={report['scans'][mode]['threshold_amp']}")
+        print(
+            f"{mode}: Jc={jc}  induction≈{report['scans'][mode]['induction_amp_1p5_Jc']}"
+        )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Wrote {args.out}")
