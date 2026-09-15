@@ -231,7 +231,7 @@ VA_paper=1、VA_recurrence=3、VA_strict=1
 
 ![均匀组织 CV 的空间/时间收敛](../papers/figures/fig_dx_dt_convergence.png)
 
-**图注：** 左：Δx∈{0.75,0.5,0.25} mm；右：Δt∈{0.1,0.05,0.025} ms。灰带 0.55–0.85 mm/ms。数据来自 outputs/dx_convergence.csv 与 dt_convergence.csv。
+**图注：** 左：Δx∈{0.75,0.5,0.25} mm；右：Δt∈{0.1,0.05,0.025} ms。灰带 0.55–0.85 mm/ms。数值来自本仓库 dx/dt 收敛表（均匀片 CV，不重标 VA）。
 
 #### 来龙去脉与读图说明
 

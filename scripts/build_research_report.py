@@ -55,7 +55,7 @@ FIGURE_SPECS = (
         "stem": "fig_dx_dt_convergence",
         "num": "图3",
         "title": "均匀组织 CV 的空间/时间收敛",
-        "caption": "左：Δx∈{0.75,0.5,0.25} mm；右：Δt∈{0.1,0.05,0.025} ms。灰带 0.55–0.85 mm/ms。数据来自 outputs/dx_convergence.csv 与 dt_convergence.csv。",
+        "caption": "左：Δx∈{0.75,0.5,0.25} mm；右：Δt∈{0.1,0.05,0.025} ms。灰带 0.55–0.85 mm/ms。数值来自本仓库 dx/dt 收敛表（均匀片 CV，不重标 VA）。",
     },
     {
         "stem": "fig_phenotype_calibration",
@@ -898,6 +898,7 @@ def main() -> int:
     md_path = args.out_dir / "research_report.md"
     pdf_path = args.out_dir / "research_report.pdf"
     report_html = args.out_dir / "report.html"
+    report_pdf = args.out_dir / "report.pdf"
 
     html_path.write_text(html_doc, encoding="utf-8")
     md_path.write_text(md_doc, encoding="utf-8")
@@ -938,11 +939,13 @@ def main() -> int:
         "missing_figures": missing,
         "has_data_uri": "data:image" in html_doc,
     }
+    if pdf_path.is_file():
+        shutil.copy2(pdf_path, report_pdf)
+        (args.out_dir / "PDF_METHOD.txt").write_text(pdf_method + "\n", encoding="utf-8")
+        meta["report_pdf"] = _rel(report_pdf)
     (args.out_dir / "research_report_build.json").write_text(
         json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-    if pdf_path.is_file():
-        (args.out_dir / "PDF_METHOD.txt").write_text(pdf_method + "\n", encoding="utf-8")
     print(json.dumps(meta, indent=2, ensure_ascii=False))
     return 0 if meta["has_data_uri"] and meta["md_bytes"] > 1000 else 1
 

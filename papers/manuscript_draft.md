@@ -36,17 +36,19 @@ We therefore build a testable 2D monodomain **benchmark** that (i) aligns the io
 
 **Phenomenological MS lineage.** Classical MS (Mitchell & Schaeffer, 2003) remains a standard reduced ionic model. The excitability threshold λ used in the DOX twin literature descends from Djabella-type modifications. Complete Corrado-style reformulations are not identical to the λ-inward-current form implemented here.
 
-**Verification and open simulators.** Niederer et al. (2011) established N-version verification for tissue EP codes. openCARP provides a community FEM/carputils environment for multiscale EP. Our contribution occupies a narrower niche: an open, pytest-gated **protocol benchmark** when the closed LBM twin cannot be re-run, not a replacement for organ-scale FEM or GPU LBM.
+**Verification and open simulators.** Niederer et al. (2011) established N-version verification for tissue EP codes. openCARP provides a community FEM/carputils environment for multiscale EP. Our contribution occupies a narrower niche: an open, regression-tested **protocol benchmark** when the closed LBM twin cannot be re-run, not a replacement for organ-scale FEM or GPU LBM.
 
 ---
 
 ## 3. Methods
 
-### 3.1 Task formulation
+### 3.1 Task formulation and pipeline
 
 **Input.** Grid \((n_x,n_y,\Delta x)\), healthy/fibrotic diffusion \(D\) and excitability \(\lambda\), S1–S2 timetable, tissue mask.  
 **Output.** Transmembrane field \(u\), activation times, CV, triple VA labels, phase-diagram table.  
 **Scope.** 2D monodomain on CPU. Out of scope: bidomain, Purkinje network, patient fibre fields, 3D LV anatomy, Lattice–Boltzmann, clinical decision support.
+
+The runnable pipeline is deliberately linear so that each protocol choice is isolated. (i) Instantiate a λ-modified Mitchell–Schaeffer cell and integrate the monodomain PDE with conservative face-averaged diffusion under an explicit Euler step that respects both the diffusion CFL and an ionic \(\Delta t\) ceiling. (ii) Assign three tissue classes (healthy / border / dense fibrosis) and apply current-injection S1–S2 with induction and observation windows kept separate. (iii) On the pinned annulus, sample twelve ordered angular probes and compute persist time together with extra-cycle and re-lap counts. (iv) Emit three VA labels from the same traces without conflating criteria. (v) Fit CONTROL / DOX1 / DOX2 phenotype parameters to literature APD/CV anchors within ±10%, and gate the scaffold with zero-dimensional APD, homogeneous CV, operator-consistency, and fibrosis-free Non-VA checks. Numbers reported below are produced by this pipeline on the public package; they are not transcribed from closed 3D twin tables.
 
 ### 3.2 Modified Mitchell–Schaeffer with λ
 
@@ -102,9 +104,9 @@ Literature **targets** (Villar-Valero *J Physiol*): healthy APD 309 / 269 / 210 
 
 Verification gates include 0D APD golden regression, homogeneous 2D CV band, full-domain diffusion-operator consistency, fibrosis-free Non-VA, and the annulus triple-endpoint phase diagram. Spatial/temporal CV tables document sensitivity under \(\Delta x\in\{0.75,0.5,0.25\}\,\mathrm{mm}\) and \(\Delta t\in\{0.1,0.05,0.025\}\,\mathrm{ms}\). Optional 2D phase-singularity tip counts are auxiliary; they are not 3D filament tracking.
 
-### 3.8 Software
+### 3.8 Software and reproducibility
 
-The package, tests, phase-diagram driver, and SciencePlots figure script ship with the public repository (MIT license). Figures use the `science` + `no-latex` styles with Times New Roman for Latin text.
+The public repository (MIT license) ships the monodomain package, automated regression tests, a full-grid phase-diagram driver, and a SciencePlots redraw script. Latin glyphs in figures use Times New Roman under the `science` + `no-latex` styles; CJK captions in the companion research report use a system CJK face when available. Curated phase-diagram tables accompany the manuscript data folder so that headline VA counts can be re-checked without regenerating the full scan.
 
 ---
 

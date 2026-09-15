@@ -16,8 +16,8 @@ Literature APD/CV figures appear only as **targets / anchors** for calibration.
 |------|-------|
 | Repository | https://github.com/Coucou2016/DOX-LBM-GPU |
 | Display name | Fibrosis-Reentry-MS2D |
-| Git SHA (this audit base) | `cfe58a0938c56516ee61f3ed03ff844c5ed8b5b3` |
-| Message | Round-3: close P1/P2 tails — APD/R, circulation, anisotropy, CITATION. |
+| Git SHA (this audit base) | `2ecfc17dc38fb91a1a1a62ae1eff636ceb3b1b52` (pre-polish; refresh after quality commit) |
+| Message | Publish wavelength-aware 2D protocol benchmark package. |
 | Scope of deliverable | Open **2D** monodomain protocol **benchmark** |
 | Explicitly **not** done | 3D LBM–GPU twin; Zenodo porcine MI ingest; clinical ICD tool |
 

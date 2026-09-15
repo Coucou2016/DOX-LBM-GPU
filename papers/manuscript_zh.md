@@ -38,11 +38,19 @@ DOX 纤维化孪生与评述见 Villar-Valero 与 Chabiniok–Zaha。纤维化�
 
 ## 3. 方法
 
-方程、守恒扩散、CFL、组织类别、电流刺激、S1–S2、三重终点、波长验证几何与表型标定与英文稿第 3 节一致。环相图：\(\tau_{\mathrm{close}}=150\,\mathrm{ms}\)，\(64\times64\)，\(\Delta x=0.75\,\mathrm{mm}\)，路径≈106.8 mm，12 角向探针。文献目标仅作锚点；本机测得 CONTROL/DOX1/DOX2 的 APD 与 CV 均在 ±10% 匹配标志内。
+### 3.1 任务与流水线
+
+输入为网格 \((n_x,n_y,\Delta x)\)、健康/纤维化扩散 \(D\) 与兴奋性 \(\lambda\)、S1–S2 时刻表与组织掩膜；输出为膜电位场 \(u\)、激活时刻、CV、三重 VA 标签与相图表。范围限定为 CPU 上的二维单域；双域、浦肯野、患者纤维场、三维左室解剖、Lattice–Boltzmann 与临床决策均不在范围。
+
+流水线按模块隔离协议选择：（i）含 λ 的修正 Mitchell–Schaeffer 离子律 + 面平均守恒扩散 \(\nabla\cdot(D\nabla u)\)，加性显式欧拉，同时服从扩散 CFL 与离子 \(\Delta t\le 0.1\,\mathrm{ms}\)；（ii）健康/交界/致密纤维化三相组织，默认电流刺激，诱导窗与观察窗分离；（iii）钉扎环上 12 个有序角向探针，记录 persist、额外兴奋与再入圈数；（iv）同一轨迹并列输出 VA_paper / VA_recurrence / VA_strict，准则互不 OR；（v）CONTROL/DOX1/DOX2 对文献 APD/CV 锚点做 ±10% 标定，并以 0D APD、均匀 CV、算子一致性与无纤维化 Non-VA 作为验证闸门。下文数字均来自该流水线，而非封闭三维孪生结果表。
+
+### 3.2 离子律、扩散与终点
+
+膜方程与门控、面平均 \(D\)、CFL、组织类别、S1–S2（BCL 400 ms；DOX1 extras 240/200/190 ms）与英文稿第 3 节一致。三重终点：VA_paper 仅 persist≥1000 ms；VA_recurrence（默认标签）要求再兴奋证据；VA_strict 为 persist≥1000 ms 且再入循环。设计波长 \(\mathrm{CV}\times\mathrm{APD}\approx175\)–\(180\,\mathrm{mm}\)；小圆盘（~24 mm）为阴性对照；钉扎环路径≈106.8 mm 为波长感知验证几何。环相图网格：\(\tau_{\mathrm{close}}=150\,\mathrm{ms}\)，\(64\times64\)，\(\Delta x=0.75\,\mathrm{mm}\)。
 
 ---
 
-## 4. 结果（本机计算）
+## 4. 结果（本流水线计算）
 
 - 0D APD₉₀ = **256.6 ms**
 - 均匀 2D CV = **0.703 mm/ms** @ \(D=0.0465\)
@@ -52,7 +60,7 @@ DOX 纤维化孪生与评述见 Villar-Valero 与 Chabiniok–Zaha。纤维化�
 - 环相图：**VA_paper 1/11**，**VA_recurrence 3/9**，**VA_strict 1/11**
 - VA 格点细节同英文稿表（λ=0.01×D↓70%、0.01×D↓90%、0.1×D↓30%）
 
-图件：`papers/figures/fig_*.png`（SciencePlots 重绘）。
+图件与英文稿 Results 中 Fig. 1–7 对应（SciencePlots 重绘）。
 
 ---
 
