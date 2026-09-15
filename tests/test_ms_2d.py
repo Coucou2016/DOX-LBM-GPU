@@ -159,3 +159,103 @@ def test_estimate_cv_uses_euclidean_hypot():
     cv = estimate_cv_from_activation(act, p0=(2, 2), p1=(5, 6), dx=0.5)
     assert cv is not None
     assert abs(cv - (5.0 * 0.5) / 10.0) < 1e-12
+
+
+def test_ordered_circulation_direction_and_lap_periods():
+    """Synthetic CW probe times → direction + ≥2 lap periods."""
+    from cardiac_ms.ms_2d import _ordered_circulation_metrics
+
+    n = 8
+    period = 100.0
+    # Two full CW laps: probe i activates at t = k*period + i*(period/n)
+    times = [[] for _ in range(n)]
+    for lap in range(2):
+        for i in range(n):
+            times[i].append(lap * period + i * (period / n))
+    # Third visit on each probe → ≥2 inter-visit gaps
+    for i in range(n):
+        times[i].append(2 * period + i * (period / n))
+    m = _ordered_circulation_metrics(times)
+    assert m["direction"] == "cw"
+    assert m["n_ordered_laps"] >= 2
+    assert m["lap_period_ms"] is not None
+    assert abs(m["lap_period_ms"] - period) < 1.0
+    assert m["n_lap_periods"] >= 2 * n
+
+
+def test_ordered_circulation_ccw_and_scrambled_first_pass():
+    """CCW with a scrambled first-pass order still recovers direction via votes."""
+    from cardiac_ms.ms_2d import _ordered_circulation_metrics
+
+    n = 6
+    period = 80.0
+    times = [[] for _ in range(n)]
+    # Messy first activations (not a circular shift)
+    messy = [0, 3, 1, 4, 2, 5]
+    for rank, i in enumerate(messy):
+        times[i].append(float(rank))
+    # Clean CCW laps afterwards
+    for lap in range(2):
+        for k, i in enumerate(reversed(range(n))):
+            times[i].append(20.0 + lap * period + k * (period / n))
+    m = _ordered_circulation_metrics(times)
+    assert m["direction"] == "ccw"
+    assert m["lap_period_ms"] is not None
+    assert m["n_lap_periods"] >= 2
+
+
+def test_anisotropy_cfl_uses_max_d_long_trans():
+    """CFL / dt clamp must see max(D_long, D_trans), not only scalar D_field."""
+    from cardiac_ms.constants import D_HEALTHY_MM2_PER_MS
+    from cardiac_ms.ms_2d import suggest_dt_cfl
+
+    d_long = 0.2
+    d_trans = 0.05
+    dx = 0.5
+    # Large requested dt must clamp against d_long
+    _, _, _, meta = simulate_mono2d(
+        nx=24,
+        ny=24,
+        n_steps=50,
+        dt=1.0,
+        dx=dx,
+        fibrosis=False,
+        D_normal=D_HEALTHY_MM2_PER_MS,
+        anisotropy=True,
+        D_long=d_long,
+        D_trans=d_trans,
+        fiber_angle_rad=0.0,
+        enforce_cfl=True,
+        s2_window=(99999, 999999),
+        s1_window=(2, 6),
+        stimulus_mode="current",
+        stim_u=0.8,
+        snapshots=False,
+    )
+    dt_lim = suggest_dt_cfl(dx, max(d_long, d_trans, D_HEALTHY_MM2_PER_MS), safety=0.5)
+    assert meta["dt_clamped"] is True
+    assert meta["dt"] <= dt_lim + 1e-9
+    assert meta["cfl_r"] <= 0.51 + 1e-6
+
+
+def test_anisotropy_isotropic_limit_theta_0_and_90():
+    """
+    Prototype anisotropy: when D_long == D_trans, θ=0° and 90° match isotropic
+    Laplacian on the interior (not a main scientific result).
+    """
+    from cardiac_ms.ms_2d import fiber_conductivity_tensor, laplacian_anisotropic
+
+    rng = np.random.default_rng(3)
+    u = rng.standard_normal((20, 20))
+    dx = 0.5
+    D0 = 0.8
+    iso = diffusion_div_D_grad_neumann(u, np.full_like(u, D0), dx)
+    for angle in (0.0, np.pi / 2):
+        Dxx, Dyy, Dxy = fiber_conductivity_tensor(
+            20, 20, D_long=D0, D_trans=D0, angle_rad=angle
+        )
+        assert np.max(np.abs(Dxy)) < 1e-12
+        aniso = laplacian_anisotropic(u, dx, Dxx, Dyy, Dxy)
+        # Interior agreement (boundaries may differ slightly with cross-term stencil)
+        err = np.max(np.abs(iso[2:-2, 2:-2] - aniso[2:-2, 2:-2]))
+        assert err < 1e-8, f"angle={angle}: err={err}"

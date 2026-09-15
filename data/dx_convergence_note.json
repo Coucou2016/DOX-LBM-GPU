@@ -1,0 +1,4 @@
+{
+  "va_classification_note": "VA labels at default annulus dx=0.75 mm are in papers/data/phase_diagram.csv (full 4\u00d73); this sweep does not reclassify VA per dx (homogeneous CV only).",
+  "apd0d_ms": 253.8
+}

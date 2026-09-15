@@ -58,7 +58,9 @@
 - Neumann（零通量）边界
 - 三相组织：健康 / 边界（致密掩膜的形态学膨胀）/ 致密纤维化
 - 标准 S1–S2（BCL=400 ms，n_s1=3）与折返判定（**需要再兴奋周期**，见下）
-- 各向异性 `div(D∇u)` 桩（`fiber_conductivity_tensor` + `laplacian_anisotropic`）
+- 各向异性 `div(D∇u)` **原型**（`fiber_conductivity_tensor` + `laplacian_anisotropic`）：
+  CFL 使用 `max(D_long, D_trans)`；`D_long=D_trans` 时 θ=0°/90° 与各向同性算子在内部一致。
+  **不是**主结果；未声称达到三维各向异性 LBM 精度。
 
 **未** 实现（与 Villar-Valero / 临床管线差距）：
 
@@ -120,4 +122,4 @@ Villar-Valero 健康组织锚点（*J Physiol* 2026）：APD CONTROL 309 / DOX1 
 
 ## dx / dt 收敛
 
-`scripts/run_dx_convergence.py` 写出 `data/dx_convergence.csv` 与 `data/dt_convergence.csv`。用于数值验证，不是生物学结论。
+`scripts/run_dx_convergence.py` 写出 `data/dx_convergence.csv` 与 `data/dt_convergence.csv`，含 0D APD、波长代理 `CV×APD`、钉扎环 lap 估计 `path/CV`，以及指向默认 dx=0.75 mm 相图 VA 标签的说明。用于数值验证，不是生物学结论。VA 分类不按 dx 重跑全格点（见 `papers/data/phase_diagram.csv`）。

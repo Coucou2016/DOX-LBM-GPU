@@ -139,6 +139,8 @@ def test_annulus_slow_circuit_is_va():
 
     Paper multi-extra train (240/200/190) induces extra≥1 or relapped≥3.
     Local elevated u at observe end may coexist with VA (not a counterexample).
+    Ordered circulation should report a CW/CCW direction and lap periods when
+    VA_strict (persist≥1000 + recurrence) holds.
     """
     r = run_annulus_s1s2(
         nx=64,
@@ -153,6 +155,10 @@ def test_annulus_slow_circuit_is_va():
     assert r["label"] == "VA", r
     assert r["u_max"] > 0.5
     assert r["tau_close_ring"] == 150.0
+    if r.get("VA_strict") == "VA":
+        assert r.get("circulation_direction") in ("cw", "ccw"), r
+        assert r.get("lap_period_ms") is not None and float(r["lap_period_ms"]) > 0, r
+        assert int(r.get("n_lap_periods") or 0) >= 2, r
 
 
 def test_annulus_fast_or_blocked_is_non_va():

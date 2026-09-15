@@ -9,7 +9,10 @@ description = "Fibrosis-Reentry-MS2D: wavelength-aware 2D monodomain protocol/be
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "DOX-LBM-GPU / Fibrosis-Reentry-MS2D contributors" }]
+authors = [
+  { name = "Coucou2016" },
+  { name = "DOX-LBM-GPU / Fibrosis-Reentry-MS2D contributors" },
+]
 dependencies = [
   "numpy>=1.22",
 ]

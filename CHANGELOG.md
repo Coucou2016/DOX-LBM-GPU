@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — Round-3: close remaining P1/P2 tails
+
+### Phase diagram / metrics
+- Per-cell `apd0d_ms` and `R_path_over_CV_APD` (= path/(CV·APD); CV from two-point or path/lap_period) in phase-diagram CSV + summary.
+- Ordered circulation: event-stream direction vote + median lap period; `n_lap_periods`; VA_strict cases expect CW/CCW + ≥2 lap gaps when probes re-fire.
+- Anisotropy prototype: CFL uses `max(D_long, D_trans)`; isotropic-limit tests at θ=0°/90°.
+- dx/dt convergence CSV: wavelength + annulus lap estimate + VA note pointing at curated phase CSV.
+- `CITATION.cff`: software author Coucou2016; preferred-citation = this software; Villar-Valero (Javier, 2026) related reference.
+
+### Docs
+- ASSUMPTIONS anisotropy documented as prototype; deferred APD/R language removed from CHANGELOG/summary.
+
 ## [Unreleased] — Round-2 major revision (P0+P1)
 
 ### Triple VA endpoints
@@ -19,7 +31,7 @@
 - Title: *A wavelength-aware 2D monodomain benchmark for auditable fibrosis–reentry protocols* (3D boundary in Abstract/Limitations).
 - Chinese separated to `papers/manuscript_zh.md`; English manuscript cleaned.
 - ASSUMPTIONS: additive Euler (not operator splitting); `data/README.md` drops local MonoAlg3D tree claim / absolute paths.
-- `CITATION.cff`: preferred-citation is this software; author placeholders; related ref Javier Villar-Valero, year 2026 with Epub 2025 note.
+- `CITATION.cff`: preferred-citation is this software; related ref Javier Villar-Valero, year 2026 with Epub 2025 note.
 - `.github/workflows/tests.yml` + `pyproject.toml` (`pip install -e .`).
 
 ### P1
@@ -27,7 +39,7 @@
 - Annulus ordered angular probes default **12** (clamped 8–16); direction / lap period / complete laps → VA evidence.
 - `border_width_mm` physical API; dx/dt convergence CSV includes 0D APD tissue metric.
 - javilva λ∈{0.01,0.1,0.2,0.3} RHS cross-check green (machine-local paths sanitized in JSON).
-- Per-cell APD / R=L/(CV·APD) deferred (documented in phase summary); CV/path already in CSV.
+- Per-cell APD / R=L/(CV·APD) shipped in phase CSV (see Round-3).
 
 ## [Unreleased] — Major Revision gap-closing (earlier P1)
 
@@ -49,7 +61,7 @@
 ## [Unreleased] — Major Revision (peer-review P0)
 
 ### Scientific positioning
-- Repositioned as an **open 2D protocol/benchmark** (wavelength-aware monodomain), not a 3D LBM–GPU DOX digital-twin reproduction.
+- Repositioned as an **open 2D protocol/benchmark** (wavelength-aware monodomain), not a 3D LBM–GPU digital-twin reproduction.
 - Clarified: cell model / parameters / sample anatomy are public (`javilva/doxorubicin_fibrosis_model`); production solver remains proprietary.
 - Display name: **Fibrosis-Reentry-MS2D** (GitHub remote name unchanged).
 

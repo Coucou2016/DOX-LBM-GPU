@@ -1,4 +1,4 @@
-dx_mm,dt_ms,dt_requested_ms,nx,ny,cv_mm_per_ms,u_max,cfl_r,dt_clamped,elapsed_s,apd0d_ms
-0.75,0.1,0.1,32,32,0.6617647058823529,0.9794339686308153,0.03306666666666667,False,2.2143321000039577,253.8
-0.5,0.1,0.1,48,48,0.7086614173228345,0.9794339692540043,0.07440000000000001,False,2.947631699964404,253.8
-0.25,0.1,0.1,96,96,0.7258064516129034,0.9794339692540154,0.29760000000000003,False,5.956192799960263,253.8
+dx_mm,dt_ms,dt_requested_ms,nx,ny,cv_mm_per_ms,u_max,cfl_r,dt_clamped,elapsed_s,apd0d_ms,wavelength_mm,annulus_lap_est_ms,va_classification_note
+0.75,0.1,0.1,32,32,0.6617647058823529,0.9794339686308153,0.03306666666666667,False,2.459145999979228,253.8,167.9558823529412,161.40804922443562,VA labels at default annulus dx=0.75 mm are in papers/data/phase_diagram.csv (full 4×3); this sweep does not reclassify VA per dx (homogeneous CV only).
+0.5,0.1,0.1,48,48,0.7086614173228345,0.9794339692540043,0.07440000000000001,False,3.301650100154802,253.8,179.8582677165354,150.72663420223034,VA labels at default annulus dx=0.75 mm are in papers/data/phase_diagram.csv (full 4×3); this sweep does not reclassify VA per dx (homogeneous CV only).
+0.25,0.1,0.1,96,96,0.7258064516129034,0.9794339692540154,0.29760000000000003,False,6.326623300090432,253.8,184.20967741935488,147.16616252816183,VA labels at default annulus dx=0.75 mm are in papers/data/phase_diagram.csv (full 4×3); this sweep does not reclassify VA per dx (homogeneous CV only).

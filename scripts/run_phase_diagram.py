@@ -34,8 +34,71 @@ from cardiac_ms.constants import (
     TAU_CLOSE,
 )
 from cardiac_ms.geometries import annulus_wavelength_report, default_annulus_spec
+from cardiac_ms.ms_0d import measure_apd
+from cardiac_ms.ms_modified import get_modified_parameters, simulate_ms_0d_modified
 from cardiac_ms.protocol_s1s2 import run_annulus_s1s2, run_s1s2
 from cardiac_ms.tissue_classes import disk_fibrosis_three_class
+
+
+def _cell_apd0d_ms(*, lam: float, tau_close: float) -> float | None:
+    """Cheap 0D APD90 proxy for the cell's λ / τ_close (not a tissue map)."""
+    p = get_modified_parameters(lam=float(lam), tau_close=float(tau_close))
+    t, u, _ = simulate_ms_0d_modified(n_steps=5000, dt=0.1, params=p)
+    return measure_apd(t, u).get("apd_ms")
+
+
+def _wavelength_ratio(
+    *,
+    path_mm: float | None,
+    cv_mm_per_ms: float | None,
+    apd_ms: float | None,
+    lap_period_ms: float | None = None,
+) -> tuple[float | None, float | None, str | None]:
+    """
+    Return (cv_used, R=L/(CV·APD), cv_source).
+
+    Prefer two-point CV; if missing, estimate CV ≈ path / lap_period.
+    """
+    cv = float(cv_mm_per_ms) if cv_mm_per_ms is not None else None
+    src = "two_point" if cv is not None and cv > 0 else None
+    if (cv is None or cv <= 0) and path_mm and lap_period_ms and lap_period_ms > 0:
+        cv = float(path_mm) / float(lap_period_ms)
+        src = "path_over_lap"
+    if cv is None or cv <= 0 or not path_mm or not apd_ms or apd_ms <= 0:
+        return cv if (cv and cv > 0) else None, None, src
+    return cv, float(path_mm) / (float(cv) * float(apd_ms)), src
+
+
+def _enrich_apd_R(row: dict) -> dict:
+    tau = float(row.get("tau_close") or TAU_CLOSE)
+    lam = float(row["lambda_fib"])
+    apd = _cell_apd0d_ms(lam=lam, tau_close=tau)
+    cv_raw = row.get("cv_mm_per_ms")
+    try:
+        cv_raw_f = float(cv_raw) if cv_raw not in (None, "") else None
+    except (TypeError, ValueError):
+        cv_raw_f = None
+    path = row.get("path_mm")
+    try:
+        path_f = float(path) if path not in (None, "") else None
+    except (TypeError, ValueError):
+        path_f = None
+    lap = row.get("lap_period_ms")
+    try:
+        lap_f = float(lap) if lap not in (None, "") else None
+    except (TypeError, ValueError):
+        lap_f = None
+    cv_used, R, src = _wavelength_ratio(
+        path_mm=path_f,
+        cv_mm_per_ms=cv_raw_f,
+        apd_ms=apd,
+        lap_period_ms=lap_f,
+    )
+    row["apd0d_ms"] = apd
+    row["R_path_over_CV_APD"] = R
+    row["cv_for_R_mm_per_ms"] = cv_used
+    row["cv_for_R_source"] = src
+    return row
 
 
 def _rel(path: Path) -> str:
@@ -135,6 +198,7 @@ def run_cell_annulus(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "n_ordered_laps": r.get("n_ordered_laps", 0),
         "circulation_direction": r.get("circulation_direction"),
         "lap_period_ms": r.get("lap_period_ms"),
+        "n_lap_periods": r.get("n_lap_periods"),
         "cv_mm_per_ms": r.get("cv_two_point_mm_per_ms") or r.get("cv_mm_per_ms"),
         "excited_fraction": r.get("excited_fraction", 0.0),
         "u_max": r["u_max"],
@@ -198,6 +262,7 @@ def run_cell_disc(nx, ny, dx, lam_fib, d_red, spec) -> dict:
         "n_ordered_laps": r.get("n_ordered_laps", 0),
         "circulation_direction": r.get("circulation_direction"),
         "lap_period_ms": r.get("lap_period_ms"),
+        "n_lap_periods": r.get("n_lap_periods"),
         "cv_mm_per_ms": r.get("cv_two_point_mm_per_ms") or r.get("cv_mm_per_ms"),
         "excited_fraction": r.get("excited_fraction", 0.0),
         "u_max": r["u_max"],
@@ -298,6 +363,7 @@ def main() -> int:
             row = run_cell_annulus(nx, ny, dx, lam, d_red, spec)
         else:
             row = run_cell_disc(nx, ny, dx, lam, d_red, spec)
+        row = _enrich_apd_R(row)
         rows.append(row)
         print(
             f"[{k}/{n_total}] lam={lam} D↓{100 * d_red:.0f}%  "
@@ -359,8 +425,8 @@ def main() -> int:
         "healthy_cv_band": "0.55-0.85 mm/ms (homogeneous sheet, same D)",
         "n_angular_probes": 12,
         "per_cell_apd_or_R": (
-            "deferred: CSV already stores cv_mm_per_ms / path_mm; "
-            "full APD90 and R=path/(CV*APD) per cell left for a future sweep"
+            "CSV columns apd0d_ms and R_path_over_CV_APD "
+            "(R=path/(CV·APD); CV from two-point or path/lap_period)"
         ),
         "endpoints": {
             "VA_paper": "persist>=1000 ms ONLY (Villar-Valero; never OR cycle)",

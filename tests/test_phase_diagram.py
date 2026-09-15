@@ -32,3 +32,6 @@ def test_phase_diagram_smoke_tiny_grid(tmp_path: Path):
     assert "VA_recurrence" in text
     assert "VA_strict" in text
     assert "VA_cycle" in text  # backward-compat alias column
+    assert "apd0d_ms" in text
+    assert "R_path_over_CV_APD" in text
+    assert "n_lap_periods" in text

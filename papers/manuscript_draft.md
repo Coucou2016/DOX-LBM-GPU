@@ -142,7 +142,7 @@ Under spatially varying \(D\), `div(D∇u)` versus `D∇²u` can shift activatio
 
 ### 4.4 Annulus inducibility phase diagram (verification geometry)
 
-**Full 4×3 annulus grid** (DOX1-aligned extras 240/200/190 ms; \(\tau_{\mathrm{close}}=150\,\mathrm{ms}\); \(n_x=n_y=64\), \(\mathrm{d}x=0.75\,\mathrm{mm}\); path ≈106.8 mm; 12 angular probes; `stimulus_mode=current`; wall time ≈190 s). Source: `papers/data/phase_diagram.csv` (mode=`full`).
+**Full 4×3 annulus grid** (DOX1-aligned extras 240/200/190 ms; \(\tau_{\mathrm{close}}=150\,\mathrm{ms}\); \(n_x=n_y=64\), \(\mathrm{d}x=0.75\,\mathrm{mm}\); path ≈106.8 mm; 12 angular probes; `stimulus_mode=current`; wall time ≈170 s). Source: `papers/data/phase_diagram.csv` (mode=`full`). Per-cell columns include `apd0d_ms`, `R_path_over_CV_APD` (=path/(CV·APD)), circulation direction, and lap period.
 
 **Triple-endpoint summary (same 12 cells; regenerated after VA_paper persist-only fix):**
 
@@ -165,11 +165,11 @@ Under spatially varying \(D\), `div(D∇u)` versus `D∇²u` can shift activatio
 
 VA cell detail (from CSV; no fabricated statistics):
 
-| λ | D reduction | persist_ms | n_extra_cycles | n_probes_relapped | VA_recurrence | VA_paper | VA_strict |
-|---|-------------|------------|----------------|-------------------|---------------|----------|-----------|
-| 0.01 | 0.7 | 666.6 | 1 | 5 | VA | Non-VA | Non-VA |
-| 0.01 | 0.9 | 1000.0 | 2 | 9 | VA | VA | VA |
-| 0.1 | 0.3 | 632.5 | 1 | 4 | VA | Non-VA | Non-VA |
+| λ | D reduction | persist_ms | n_extra_cycles | n_probes_relapped | direction | lap_period_ms | VA_recurrence | VA_paper | VA_strict |
+|---|-------------|------------|----------------|-------------------|-----------|---------------|---------------|----------|-----------|
+| 0.01 | 0.7 | 666.6 | 1 | 5 | ccw | ≈330 | VA | Non-VA | Non-VA |
+| 0.01 | 0.9 | 1000.0 | 2 | 9 | cw | ≈446 | VA | VA | VA |
+| 0.1 | 0.3 | 632.5 | 1 | 4 | ccw | ≈347 | VA | Non-VA | Non-VA |
 
 At λ∈{0.2,0.3} all D reductions are Non-VA (functional block on the verification ring)—a geometric/excitability bound that already prevents matching a richer 3D inducibility map.
 

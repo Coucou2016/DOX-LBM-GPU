@@ -28,51 +28,133 @@ def _ordered_circulation_metrics(
     """
     Infer ordered angular circulation from probe activation times.
 
-    Probes are assumed equally spaced in angular order. A complete lap is a
-    monotonic sweep (CW or CCW) visiting all probes; lap period is the mean
-    inter-visit period at the first probe when ≥2 visits exist.
+    Probes are assumed equally spaced in angular order (indices 0..n-1).
+
+    Direction uses, in order of preference:
+    1. Circular-shift of first-activation order among active probes
+    2. Circular-shift of the *second* activation order (reentry lap; preferred
+       when the first pass is stimulus-scrambled)
+    3. Time-weighted majority of shortest signed steps between successive
+       distinct-probe events
+
+    Lap period is the median of per-probe inter-visit intervals when ≥2 visits
+    exist on ≥1 probe. Complete ordered laps ≈ min post-stim activation count
+    across probes that fired at least once (0 if direction cannot be inferred).
     """
     n = len(probe_act_times)
-    empty = {"n_ordered_laps": 0, "direction": None, "lap_period_ms": None}
+    empty: dict[str, Any] = {
+        "n_ordered_laps": 0,
+        "direction": None,
+        "lap_period_ms": None,
+        "n_lap_periods": 0,
+    }
     if n < 3:
         return empty
-    # First activation time per probe (post-stim sequence index 0)
-    first = []
-    for times in probe_act_times:
-        if not times:
-            return empty
-        first.append(float(times[0]))
-    order = list(np.argsort(np.asarray(first, dtype=np.float64)))
-    # Expected CW: 0,1,2,...,n-1 (or rotation); CCW: reverse
+
+    fired = [list(times) for times in probe_act_times if times]
+    if len(fired) < 3:
+        return empty
+
     def _is_circular_shift(seq: list[int], template: list[int]) -> bool:
         m = len(template)
-        if len(seq) != m:
+        if len(seq) != m or m < 3:
             return False
         doubled = template + template
         return any(doubled[i : i + m] == seq for i in range(m))
 
-    cw = list(range(n))
-    ccw = list(range(n - 1, -1, -1))
-    direction = None
-    if _is_circular_shift(order, cw):
-        direction = "cw"
-    elif _is_circular_shift(order, ccw):
-        direction = "ccw"
-    # Complete ordered laps ≈ min number of post-stim activations across probes
-    n_laps = int(min(len(t) for t in probe_act_times))
-    lap_period = None
-    ref = probe_act_times[0]
-    if len(ref) >= 2:
-        diffs = np.diff(np.asarray(ref, dtype=np.float64))
-        if diffs.size:
-            lap_period = float(np.mean(diffs))
-    if direction is None and n_laps < 1:
+    def _direction_from_kth_activation(k: int) -> str | None:
+        """Order probes by their (k+1)-th activation time; test CW/CCW shift."""
+        pairs: list[tuple[float, int]] = []
+        for i, times in enumerate(probe_act_times):
+            if len(times) > k:
+                pairs.append((float(times[k]), int(i)))
+        if len(pairs) < 3:
+            return None
+        pairs.sort(key=lambda p: (p[0], p[1]))
+        order = [i for _, i in pairs]
+        active_sorted = sorted(order)
+        idx_map = {p: j for j, p in enumerate(active_sorted)}
+        seq = [idx_map[p] for p in order]
+        m = len(active_sorted)
+        if _is_circular_shift(seq, list(range(m))):
+            return "cw"
+        if _is_circular_shift(seq, list(range(m - 1, -1, -1))):
+            return "ccw"
+        return None
+
+    direction: str | None = _direction_from_kth_activation(0)
+    # Prefer second-pass (reentry) order when available — first pass is often
+    # stimulus-dominated and not a clean circular sweep.
+    second = _direction_from_kth_activation(1)
+    if second is not None:
+        direction = second
+    elif direction is None:
+        third = _direction_from_kth_activation(2)
+        if third is not None:
+            direction = third
+
+    # Event-stream vote (time-weighted; handles residual ties)
+    events: list[tuple[float, int]] = []
+    for i, times in enumerate(probe_act_times):
+        for t in times:
+            events.append((float(t), int(i)))
+    events.sort(key=lambda e: (e[0], e[1]))
+    cw_w = 0.0
+    ccw_w = 0.0
+    cw_votes = 0
+    ccw_votes = 0
+    for (t0, i0), (t1, i1) in zip(events, events[1:]):
+        if i0 == i1:
+            continue
+        dt = t1 - t0
+        if dt < 1e-9:
+            continue
+        # Cap weight so one long quiet gap cannot dominate
+        w = min(float(dt), 50.0)
+        d = (i1 - i0) % n
+        if d == 0 or d == n - d:
+            continue
+        if d > n - d:
+            ccw_w += w
+            ccw_votes += 1
+        else:
+            cw_w += w
+            cw_votes += 1
+    if direction is None:
+        if cw_w > ccw_w * 1.05 and cw_votes >= 2:
+            direction = "cw"
+        elif ccw_w > cw_w * 1.05 and ccw_votes >= 2:
+            direction = "ccw"
+
+    counts = [len(t) for t in probe_act_times if t]
+    n_laps = int(min(counts)) if counts else 0
+    # When direction is known and several probes re-fired, report at least the
+    # median activation count among probes with ≥2 visits (better than min=1
+    # when a few probes miss a lap).
+    relap_counts = [len(t) for t in probe_act_times if len(t) >= 2]
+    if direction is not None and relap_counts and len(relap_counts) >= max(3, n // 3):
+        n_laps = max(n_laps, int(np.median(relap_counts)))
+
+    gaps: list[float] = []
+    n_lap_periods = 0
+    for times in probe_act_times:
+        if len(times) >= 2:
+            diffs = np.diff(np.asarray(times, dtype=np.float64))
+            gaps.extend(float(x) for x in diffs if np.isfinite(x) and x > 0)
+            n_lap_periods += max(0, len(times) - 1)
+    lap_period = float(np.median(gaps)) if gaps else None
+
+    if direction is None and n_laps < 1 and lap_period is None:
         return empty
     return {
         "n_ordered_laps": n_laps if direction is not None else 0,
         "direction": direction,
         "lap_period_ms": lap_period,
-        "first_activation_order": order,
+        "n_lap_periods": n_lap_periods,
+        "cw_votes": cw_votes,
+        "ccw_votes": ccw_votes,
+        "cw_weight": cw_w,
+        "ccw_weight": ccw_w,
     }
 
 
@@ -443,6 +525,14 @@ def simulate_mono2d(
             lam_field = lam
 
     D_max = float(max(float(D[conducting].max()) if conducting.any() else float(D.max()), 1e-18))
+    # Anisotropy: explicit CFL must use max(D_long, D_trans) (and field D).
+    d_long_eff: float | None = None
+    d_trans_eff: float | None = None
+    if anisotropy:
+        d_long_eff = float(D_long if D_long is not None else D_normal)
+        d_trans_eff = float(D_trans if D_trans is not None else float(D_normal) * 0.25)
+        D_max = float(max(D_max, d_long_eff, d_trans_eff))
+
     dt_clamped = False
     dt_stable = suggest_dt_cfl(dx, D_max, safety=0.5)
     if dt is None:
@@ -474,10 +564,9 @@ def simulate_mono2d(
 
     Dxx = Dyy = Dxy = None
     if anisotropy:
-        d_long = D_long if D_long is not None else D_normal
-        d_trans = D_trans if D_trans is not None else D_normal * 0.25
+        assert d_long_eff is not None and d_trans_eff is not None
         Dxx, Dyy, Dxy = fiber_conductivity_tensor(
-            ny, nx, D_long=d_long, D_trans=d_trans, angle_rad=fiber_angle_rad
+            ny, nx, D_long=d_long_eff, D_trans=d_trans_eff, angle_rad=fiber_angle_rad
         )
         if fibrosis:
             Dxx = np.where(mask, D_fibrosis if tissue is None else D, Dxx)
@@ -643,15 +732,21 @@ def simulate_mono2d(
         "n_ordered_laps": 0,
         "direction": None,
         "lap_period_ms": None,
+        "n_lap_periods": 0,
     }
     n_ordered_laps = int(circulation.get("n_ordered_laps") or 0)
     if n_ordered_laps <= 0 and extra_upstrokes.size:
         # Fallback: complete laps ≈ min upstroke count across angular probes.
+        # Keep inferred direction/lap_period when the event-stream vote succeeded
+        # but some probes were silent on the first pass (n_laps==0 path).
         n_ordered_laps = int(extra_upstrokes.min())
+        direction = circulation.get("direction")
+        if direction is None and n_ordered_laps >= 1:
+            direction = "unknown"
         circulation = {
             **circulation,
             "n_ordered_laps": n_ordered_laps,
-            "direction": circulation.get("direction") or "unknown",
+            "direction": direction,
         }
     activity_duty_cycle = (
         float(active_post_steps) / float(post_stim_steps) if post_stim_steps else 0.0

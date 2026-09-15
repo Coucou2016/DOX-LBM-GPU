@@ -375,6 +375,7 @@ def run_s1s2(
         "n_ordered_laps": n_ordered,
         "circulation_direction": circ.get("direction"),
         "lap_period_ms": circ.get("lap_period_ms"),
+        "n_lap_periods": circ.get("n_lap_periods"),
         "extra_upstrokes": list(extra_up),
         "n_upstrokes_post_stim": int(meta.get("n_upstrokes_post_stim") or 0),
         "excited_fraction": float(meta.get("excited_fraction") or 0.0),
