@@ -39,7 +39,14 @@ Thumbs.db
 !papers/figures/
 !papers/figures/**/*.png
 !papers/figures/**/*.pdf
+!papers/manuscript.pdf
 !reports/*.pdf
+!reports/figures/
+!reports/figures/**/*.png
+!reports/figures/**/*.pdf
+!outputs/figures/
+!outputs/figures/**/*.png
+!outputs/figures/**/*.pdf
 
 # Large binary arrays under data/synthetic (JSON metadata is tracked)
 data/synthetic/*.npy

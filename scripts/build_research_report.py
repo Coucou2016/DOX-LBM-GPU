@@ -26,6 +26,7 @@ if str(ROOT) not in sys.path:
 REPORTS = ROOT / "reports"
 FIG_CANDIDATES = (
     ROOT / "papers" / "figures",
+    ROOT / "reports" / "figures",
     ROOT / "outputs" / "figures",
 )
 PHASE_CSV_CANDIDATES = (
@@ -42,31 +43,43 @@ FIGURE_SPECS = (
         "stem": "fig_ms_0d_ap",
         "num": "图1",
         "title": "经典 Mitchell–Schaeffer 零维动作电位与 APD₉₀",
-        "caption": "seed=42 的 0D 仿真；虚线标出激活时刻与 APD 终点。",
+        "caption": "seed=42 的 0D 仿真；虚线标出激活时刻与 APD 终点。本机 APD₉₀=256.6 ms。",
     },
     {
         "stem": "fig_validation_summary",
         "num": "图2",
-        "title": "验证汇总：0D APD、均匀 2D CV、相图计数",
-        "caption": "灰带为预设可接受带宽；CV 目标线 0.70 mm/ms；相图计数同步自 phase_diagram_summary.json。",
+        "title": "验证汇总：0D APD、均匀 2D CV、三重 VA 终点计数",
+        "caption": "灰带为预设可接受带宽；CV 目标线 0.70 mm/ms；右栏为 VA_paper / VA_recurrence / VA_strict（1 / 3 / 1，分母 12）。",
+    },
+    {
+        "stem": "fig_dx_dt_convergence",
+        "num": "图3",
+        "title": "均匀组织 CV 的空间/时间收敛",
+        "caption": "左：Δx∈{0.75,0.5,0.25} mm；右：Δt∈{0.1,0.05,0.025} ms。灰带 0.55–0.85 mm/ms。数据来自 outputs/dx_convergence.csv 与 dt_convergence.csv。",
+    },
+    {
+        "stem": "fig_phenotype_calibration",
+        "num": "图4",
+        "title": "CONTROL/DOX1/DOX2 表型标定：文献目标 vs 本机实测",
+        "caption": "灰色=文献 APD/CV 目标（Villar-Valero 锚点）；彩色=本机标定测量。匹配容差 ±10%。",
     },
     {
         "stem": "fig_phase_diagram",
-        "num": "图3",
-        "title": "钉扎环 λ_fib × D_fib 诱发性相图",
-        "caption": "暖色=VA，冷色=Non-VA；计数以 phase_diagram_summary.json 为准。",
+        "num": "图5",
+        "title": "钉扎环 λ_fib × D_fib 诱发性相图（默认 VA_recurrence）",
+        "caption": "暖色=VA，冷色=Non-VA；完整 4×3 为 VA_recurrence 3 / Non-VA 9。",
     },
     {
         "stem": "fig_diffusion_compare",
-        "num": "图4",
+        "num": "图6",
         "title": "扩散算子对照：∇·(D∇u) 与 D∇²u 的激活持续",
-        "caption": "异质 D 下捷径算子可改变 persist，标签未必翻转。",
+        "caption": "异质 D 下捷径算子可改变 persist（本协议约差 65 ms），标签未必翻转。",
     },
     {
         "stem": "fig_mono2d_u",
-        "num": "图5",
+        "num": "图7",
         "title": "均匀二维单域膜电位场快照",
-        "caption": "修正 MS、无纤维化短时程仿真终态 u 场。",
+        "caption": "修正 MS、无纤维化短时程仿真终态 u 场（烟雾测试，非折返证据）。",
     },
 )
 
@@ -244,14 +257,51 @@ def figure_explanations_html() -> dict[str, str]:
 <li><strong>中栏（均匀 2D CV）：</strong>灰带 0.55–0.85 mm/ms；虚线目标 <strong>0.70 mm/ms</strong>
 （数值上对应论文健康纤维向量级 ≈0.7 m/s）。标定实测 <strong>0.703125 mm/ms</strong> @
 D=0.0465 mm²/ms。</li>
-<li><strong>右栏（相图计数）：</strong>钉扎环 λ×D 扫描；完整 4×3 为 <strong>VA 3 / Non-VA 9</strong>
-（快扫 2×2 子集曾为 1/3，与重叠格点一致）。若全 Non-VA，优先怀疑几何放不下波长；
-若全 VA，优先怀疑终点过松或 persist 规则滥用。</li>
+<li><strong>右栏（三重终点）：</strong>同一 12 格上并列
+<strong>VA_paper=1</strong>、<strong>VA_recurrence=3</strong>、<strong>VA_strict=1</strong>
+（分母均为 12；表为 VA/Non-VA = 1/11、3/9、1/11）。
+若只看 persist≥1000，会漏掉两格“再入但未满 1000 ms”的 recurrence 阳性；
+若把周期 OR 进 paper 终点，则会把不同准则混成一个数。</li>
 </ul>
 <p><strong>常见误读：</strong>把“灰带内”理解成临床精度或猪心拟合优度。这里是方法学量级锚定，
 服务协议复现，不是影像–模型个性化误差条。</p>
-<p><strong>结论：</strong>离子时程、健康纤维向量级 CV、以及可同时出现正负标签的相图三者同屏成立；
+<p><strong>结论：</strong>离子时程、健康纤维向量级 CV、以及可区分的三重终点计数三者同屏成立；
 随后各图是对这三闸门的展开说明。</p>
+""",
+        "fig_dx_dt_convergence": """
+<p><strong>故事从哪里来：</strong>CV 是波长估计 λ<sub>wave</sub>≈CV×APD 的一半输入。
+若 CV 随网格/时间步剧烈漂移，后续“环路径能否放下一个波长”的论证就失去数值根基。
+因此在宣称环验证几何之前，必须先展示均匀组织 CV 对 Δx、Δt 的敏感性——这是验证文化（Niederer 2011；openCARP 分辨率例程）的本地轻量版。</p>
+<p><strong>为何画这张图：</strong>把 <code>dx_convergence.csv</code> 与 <code>dt_convergence.csv</code> 变成可审阅面板，
+明确告诉读者：相图默认用 Δx=0.75 mm，而标定常用 Δx=0.5 mm；两者 CV 都落在 0.55–0.85 带内，
+但数值并不逐位相同，不能混用。</p>
+<p><strong>面板怎么读（教师逐步）：</strong></p>
+<ul>
+<li><strong>左栏（空间）：</strong>Δx=0.75/0.5/0.25 mm → CV≈<strong>0.662 / 0.709 / 0.726</strong> mm/ms。
+加密网格 CV 略升，符合显式 FD 常见趋势；三条均在灰带内。</li>
+<li><strong>右栏（时间）：</strong>固定 Δx=0.5 mm，Δt=0.1/0.05/0.025 ms → CV≈<strong>0.709 / 0.709 / 0.696</strong> mm/ms。
+时间细化未推出带外。</li>
+<li>灰带=方法学接受带；虚线=0.70 mm/ms 标称目标。</li>
+<li><strong>本扫不做 VA 重分类</strong>：CSV 注释写明 VA 标签仍以默认环相图（dx=0.75）为准。</li>
+</ul>
+<p><strong>常见误读：</strong>“CV 变了 = 相图假”。相图在固定协议网格上自洽；收敛图回答的是数值敏感性，不是生物学剂量反应。</p>
+<p><strong>结论：</strong>均匀 CV 在所测 Δx/Δt 范围内保持量级正确，支持用 CV×APD 做波长–几何审计。</p>
+""",
+        "fig_phenotype_calibration": """
+<p><strong>故事从哪里来：</strong>Villar-Valero 报告 CONTROL/DOX1/DOX2 的健康 APD 与纤维方向 CV 作为成像校准锚点
+（例如 CONTROL APD 309 ms、CV 0.71 mm/ms）。本脚手架若要对齐“协议要素”，
+需要证明：在修正 MS 参数空间内，可以把 τ_close 与 D 拟合到这些<strong>文献目标</strong>附近——
+同时诚实声明：拟合出的参数是<strong>模型参数</strong>，不是论文常数抄录。</p>
+<p><strong>为何画这张图：</strong>把“目标 vs 实测”并排，避免读者把预设 tau_close=150（环相图常用）
+误当成 CONTROL 文献 APD。环相图与表型标定是两条相关但不同的实验轨。</p>
+<p><strong>面板怎么读（教师逐步）：</strong></p>
+<ul>
+<li>左：APD——灰柱=文献目标，蓝柱=本机 0D 实测。CONTROL 309.0、DOX1 269.0、DOX2 210.1 ms。</li>
+<li>右：CV——灰柱=文献目标，橙柱=本机均匀 2D 实测。CONTROL 0.709、DOX1 0.417、DOX2 0.441 mm/ms。</li>
+<li>接受规则：±10% 且 CFL 稳定；JSON 中 <code>apd_matched_0d</code> / <code>cv_matched</code> 均为 true。</li>
+<li><strong>禁止</strong>把这些柱高写成“我们复现了三维猪 LV 诱发性比例”——那是另一篇论文的结果表，本仓库从未运行其 LBM。</li>
+</ul>
+<p><strong>结论：</strong>表型锚点可在本开放 FD 脚手架上标定到容差内；文献数字只作目标，本机数字来自 <code>phenotype_calibration.json</code>。</p>
 """,
         "fig_phase_diagram": """
 <p><strong>故事从哪里来：</strong>Villar-Valero 在三维个性化左室上对 λ 与传导做参数扫描（约 96 组）。
@@ -266,20 +316,18 @@ D=0.0465 mm²/ms。</li>
 <ul>
 <li>横轴：纤维化区扩散降幅 D<sub>fib</sub> reduction（传导变慢；0.3/0.7/0.9 对应降 30/70/90%）。</li>
 <li>纵轴：兴奋性参数 λ<sub>fib</sub>（抬高内向电流阈值；健康 0.01，0.3 近功能阻滞）。</li>
-<li>暖色=VA，冷色=Non-VA；本报告嵌入 <strong>完整 4×3（12 格）</strong>：<strong>VA 3 / Non-VA 9</strong>。</li>
-<li>VA 格点（务必对照表1）：λ=0.01×D↓70%（persist 666.6 ms，extra=1，relapped=5）；
-λ=0.01×D↓90%（persist 1000 ms，extra=2，relapped=9）；
-λ=0.1×D↓30%（persist 632.5 ms，extra=1，relapped=4）。两格 persist&lt;1000 ms，
-说明 recurrence 终点<strong>不</strong>退化为 persist 阈值。</li>
-<li>λ≥0.2 全 Non-VA；λ=0.1 在强减速下亦 Non-VA——可作机制讨论素材，
-<strong>禁止</strong>外推为猪 LV 或临床 DOX 的定量规律。</li>
+<li>暖色=VA，冷色=Non-VA；热图默认标签=<strong>VA_recurrence</strong>：完整 4×3 为 <strong>3 / 9</strong>。</li>
+<li>三重终点对照（同 12 格）：VA_paper=<strong>1</strong>，VA_recurrence=<strong>3</strong>，VA_strict=<strong>1</strong>。</li>
+<li>VA 格点（务必对照表1）：λ=0.01×D↓70%（persist 666.6 ms，extra=1，relapped=5）→ recurrence 阳、paper 阴；
+λ=0.01×D↓90%（persist 1000 ms，extra=2，relapped=9）→ 三者皆阳；
+λ=0.1×D↓30%（persist 632.5 ms，extra=1，relapped=4）→ 仅 recurrence 阳。</li>
+<li>λ≥0.2 全 Non-VA——可作机制讨论素材，<strong>禁止</strong>外推为猪 LV 或临床 DOX 的定量规律。</li>
 </ul>
-<p><strong>与表1 / maze 评述对照：</strong>读图必须同时看 <code>n_extra_cycles</code> /
-<code>n_probes_relapped</code>。仅 persist≥1000 ms 会把平台滞留判成 VA。
-doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图只证明二维协议可审计，
-不是 maze 走廊的定量复现。</p>
-<p><strong>结论：</strong>在要求再兴奋周期的 VA 准则下，完整相图是机制可解释的混合结果（3/9），
-而不是“全阴/全阳”假象；创新点在终点与几何硬化，不在“发现新致心律失常药物机制”。</p>
+<p><strong>与表1 对照：</strong>读图必须同时看 <code>n_extra_cycles</code> /
+<code>n_probes_relapped</code> 与三列终点。仅 persist≥1000 ms 会把平台滞留判成 VA。
+本环相图只证明二维协议可审计，不是 3D maze 走廊的定量复现。</p>
+<p><strong>结论：</strong>在要求再兴奋周期的 VA 准则下，完整相图是机制可解释的混合结果（recurrence 3/9），
+而终点审计显示 paper/strict 更严（1/11）；创新点在终点与几何硬化，不在“发现新致心律失常药物机制”。</p>
 """,
         "fig_diffusion_compare": """
 <p><strong>故事从哪里来：</strong>单域方程的扩散项在数学上应是守恒形式 ∇·(D∇u)。
@@ -293,7 +341,7 @@ doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图�
 <ul>
 <li>分组柱：不同耦合间期 CI（coupling interval）——早搏越早，传导越脆弱，算子误差更容易被放大。</li>
 <li>比较量：激活持续时长 persist（ms），不是 L2 空间误差范数；选择 persist 是因为下游 VA 规则会读它。</li>
-<li>观察：persist 可差数十毫秒；在本协议下标签未必翻转——说明终点有时对算子误差不敏感，
+<li>观察：本协议 persist 可差约 <strong>65 ms</strong>；标签未翻转——说明终点有时对算子误差不敏感，
 <strong>但不能</strong>据此声称捷径永远安全。</li>
 <li>与 CFL 的关系：显式格式还受 Δt≤Δx²/(4D_max) 与离子上限 0.1 ms 约束；算子错误与稳定条件是两件不同的事。</li>
 </ul>
@@ -317,7 +365,7 @@ doi:10.1113/jp290582 用 “maze-like” 描述 DOX 三维基质；本环相图�
 <p><strong>严禁过度解读：</strong>本图<strong>不是</strong>折返阳性证据，也<strong>不能</strong>替代 S1–S2 + 周期准则 + 相图。
 若只展示漂亮的 u 场却不做终点硬化，会重复早期“平台期假阳性”陷阱，也会与 Chabiniok–Zaha
 “打开方法”的精神相反——打开方法要求终点可审计，而不是图像好看。</p>
-<p><strong>结论：</strong>2D 求解器可运行；折返结论必须以协议分类与相图（表1 + 图3）为准。</p>
+<p><strong>结论：</strong>2D 求解器可运行；折返结论必须以协议分类与相图（表1 + 图5）为准。</p>
 """,
     }
 
@@ -329,13 +377,15 @@ def prose_sections() -> dict[str, str]:
         "cover_meta": f"生成日期：{today} · 仓库：Fibrosis-Reentry-MS2D (DOX-LBM-GPU) · 性质：2D 协议/基准研究报告（非临床决策工具）",
         "abstract": """
 <p>阿霉素（DOX，doxorubicin）相关弥漫纤维化可构成室性心律失常（VA）基质。
-Villar-Valero 等（STACOM 2024 / <em>J Physiol</em> 2025，doi:10.1113/jp288819）用 MRI 个性化三维左室、
+Villar-Valero 等（STACOM 2024 / <em>J Physiol</em> 2026，doi:10.1113/jp288819）用 MRI 个性化三维左室、
 修正 Mitchell–Schaeffer（含 λ）与 GPU LBM 单域求解器扫描诱发性。细胞模型/参数/样例解剖公开
 （<code>javilva/doxorubicin_fibrosis_model</code>），生产求解器仍专有。Chabiniok &amp; Zaha（doi:10.1113/jp290313）呼吁打开方法。</p>
 <p>本仓库提供开放的 <strong>CPU 二维有限差分单域协议/基准</strong>：对齐修正 MS、守恒扩散
-∇·(D∇u)、合成三相纤维化、S1–S2（extras 240/200/190 ms），标定健康 CV≈<strong>0.70 mm/ms</strong>，
+∇·(D∇u)、合成三相纤维化、S1–S2（extras 240/200/190 ms），标定健康 CV≈<strong>0.70 mm/ms</strong>
+（本机均匀片 <strong>0.703 mm/ms</strong>），
 并报告三重 VA 终点（<code>VA_paper</code> / <code>VA_recurrence</code> / <code>VA_strict</code>）。钉扎环为波长设计的<strong>验证几何</strong>（路径≈107 mm）。
-完整 4×3 环相图 <strong>VA 3 / Non-VA 9</strong>。0D APD<sub>90</sub> 黄金回归 <strong>256.6 ms</strong>。
+完整 4×3 环相图：VA_paper <strong>1/11</strong>，VA_recurrence <strong>3/9</strong>，VA_strict <strong>1/11</strong>。
+0D APD<sub>90</sub> 黄金回归 <strong>256.6 ms</strong>。
 <strong>不是</strong>三维 DOX 孪生复现，也<strong>不</strong>声称 ICD 临床效用。</p>
 """,
         "background": """
@@ -363,10 +413,10 @@ ICD 患者选择的临床效用“尚未确立”。</p>
         "aims": """
 <ol>
 <li>实现并验证含 λ 的修正 MS 与守恒二维单域（∇·(D∇u)）。</li>
-<li>将均匀组织 CV 标定到论文健康纤维向量级（≈0.70 mm/ms @ D=0.0465）。</li>
-<li>对齐 S1–S2 与 extras；报告双重 VA 终点（persist≥1000 与周期必需）。</li>
-<li>用波长感知<strong>验证几何</strong>（环路径≈107 mm vs 健康波长≈175 mm）获得可解释的混合相图。</li>
-<li>用 SciencePlots 输出可嵌入报告的出版风格图，并生成自包含 HTML/MD/PDF。</li>
+<li>将均匀组织 CV 标定到论文健康纤维向量级（本机 ≈0.703 mm/ms @ D=0.0465）。</li>
+<li>对齐 S1–S2 与 extras；并列报告三重 VA 终点（paper / recurrence / strict）。</li>
+<li>用波长感知<strong>验证几何</strong>（环路径≈107 mm vs 健康波长≈175–180 mm）获得可解释的混合相图。</li>
+<li>用 SciencePlots 输出可嵌入报告的出版风格图，并生成自包含 HTML/MD/PDF；另附 AUDIT_EVIDENCE 证明数字为本机计算。</li>
 </ol>
 """,
         "data_methods": """
@@ -387,10 +437,11 @@ ICD 患者选择的临床效用“尚未确立”。</p>
         "process": """
 <ol>
 <li>P0：修复门控 dt、引入 λ-MS、CV 标定、守恒扩散、S1–S2。</li>
-<li>发现小圆盘相图全 Non-VA → 波长审计（175 mm vs 24 mm）。</li>
+<li>发现小圆盘相图全 Non-VA → 波长审计（≈175–180 mm vs 24 mm）。</li>
 <li>改默认钉扎环；发现平台期假阳性 → 周期必需准则 + 单 CI 负对照测试。</li>
-<li>Round-2：三重 VA 终点（paper persist-only / recurrence / strict）；完整 4×3 环相图 VA_paper 1 / VA_recurrence 3 / VA_strict 1；pytest 53 passed。</li>
-<li>SciencePlots 重绘；手稿定位为开放 2D 协议/基准；生成自包含 HTML/MD/PDF 研究报告。</li>
+<li>Round-2/3：三重 VA 终点（paper persist-only / recurrence / strict）；完整 4×3 环相图
+VA_paper 1、VA_recurrence 3、VA_strict 1；pytest 57 passed；表型标定 JSON；dx/dt 收敛表。</li>
+<li>SciencePlots 重绘（含收敛与表型面板）；手稿定位为开放 2D 协议/基准；生成自包含 HTML/MD/PDF 与 AUDIT_EVIDENCE。</li>
 </ol>
 """,
         "analysis": """
